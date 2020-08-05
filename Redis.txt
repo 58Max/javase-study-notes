@@ -1,0 +1,2452 @@
+## Docker
+
+
+
+
+
+
+
+![Docker的基本命令图](C:\Users\58max\Desktop\谁给删了我fuck谁family系列\Docker命令图.png)
+
+## *Redis*
+
+<h4><a href="https://blog.csdn.net/u011191463/article/details/83383404">docker中创建Redis容器设置密码进入容器执行客户端的操作</a></h4>
+
+
+
+- <h5><a href="https://redis.io">redis官网</a></h5>
+
+- <h5><a href="http://www.redis.cn/">redis的中文官网</a></h5>
+
+
+
+### **Redis的数据类型**
+
+#### ***String***
+
+```bash
+  append key "" #追加字符串，如果当前key不存在就相当于创建一个key
+  strlen key #获取当前key字符串的长度
+  incr key #当前key+1
+  decr key #当前key-1
+  incrby key step #设置步长指定增量
+  decr key step #指定步长指定减量
+  getrang key start end #指定截取字符串
+  setrang key start value #替换指定位置开始的字符串
+  setex key second values #如果当前k存在设置v并设置过期时间
+  setnx key values#如果不存在k则设置v，如果存在k则设置失败(在分布式锁中经常使用)
+  mset  k1 v1 k2 v2 k3 v3 #批量设置（原子性操作 同时设置多个值的时候 1个失败都失败）
+  mget k1 k2 k3 #批量获取
+
+  #对象
+   set user:1{name:zhangsan,age:3} #设置一个user:1 对象 来保存json字符保存一个对象
+   set user:1:name zhangsan user:1:age 3 #使用 对象:{id}:{filed}来设置对象
+   getset  #先get再set 返回的是get的v 然后在修改v为新的v
+```
+
+#### ***List(有序可重复集合)***
+
+```bash
+  lpush list v #在头部添加一个或者多个v（左）
+  rpush list v #在尾部添加一个或者多个v（右）
+  lpop list v #在头部移除一个或者多个v并返回（左）
+  rpop list v #在尾部移除一个或者多个v并返回（左）
+  lindex list index #通过下标获取某一个值
+  llen list #获取list的长度
+  ltrim start end #通过下标截取指定的长度
+  lrem list count v#移除指定的值的并指出个数
+  rpoplpush list otherlist #移出列表的最后一个元素并且从另一个列表开头加入一个元素
+  lset list index v #给列表中的指定索引更新v（前提该列表并且存在当前下标存在v）
+  linsert list before v otherv #在指定的v之前添加新的v
+  linsert list after v otherv #在指定的v之后添加新的v
+  rlange list start end #查询
+```
+
+> 小结  lset指令
+
++ 他实际上是一个链表 
++ 如果key（链表）不存在，就会创建新的列表
++ 如果key（链表）存在，新增内容
++ 如果移除了所有的值，空链表，也代表不存在
++ 在两边插入或者改动值，效率最高！中间元素，相对来说效率会低一点
+
+#### ***set(set中的元素不能重复，无序)***
+
+```bash
+ sadd k  v #添加向集合中添加元素
+ smebers k #查询指定集合中的元素
+ sismember k v #判断当前k集合是否存在v值
+ scard k #获取当前集合中的内容元素的个数
+ srem k v #移除指定集合中的指定值
+ srandmember k count #在指定集合中随机抽出随机个数的元素 count不写默认为1
+ spop k #在指定集合中随机移除元素
+ smove k k1 v #将指定集合k中的v移动到k1中
+ 
+ -差集 sdiff k k1 #集合k和集合k1中的差集
+ -交集 sinter k k1 #集合k和集合k1中的交集
+ -并集 sunion k k1 #集合k和集合k1中的并集
+```
+
+#### ***Hash（哈希）***
+
+Map集合，k-v(这里的v是map集合)
+
+```bash
+hset k v-k v-v #在指定hash集合里面添加v（这里的v是k-v）
+hegt k v-k #在指定hah集合中根据v-k获取相应的v-v值
+hmset k v-k v-v ... #同时在指定的hash集合中添加多个v（这里的v是k-v）如果v-k存在会覆盖掉之前的值
+hgetall k #获取指定hash集合中的所有，展现形式 k v k v
+hdel k v-k #删除指定hash集合中的v-k字段对应的v-v也会被删除
+hlen k #获取指定hash集合中的元素个数
+hexists k v-k #判断指定hash集合的指定v-k 是否存在
+hkeys k #获取指定hash中key（v-k）
+hvals k #获取指定hash中value（v-v）\
+hincrby k v-k##获取指定hash中的指定v-k的v-v加1
+hsetnx k v-k v-v #如果不存在就设置，如果存在就设置失败
+.....类似String
+```
+
+hash的应用
+
+- 存储一些变更的数据（尤其是用户信息之类的保存，经常变动的信息更适合于对象的存储）
+
+#### ***Zset(有序集合)***
+
+在set的基础上增加了一个值 qqqqqqqq3rq3222												21	
+
+```bash
+zadd k index v #添加元素（可以添加多个值）
+zrange k start end #获取元素
+zrangebyscore k start end withscores #在一定范围中（min,max）带着index的查询升序
+zrevrangbyscore k start end withscores #在一定范围中（max,min）带着index的降序查询
+zrem k v #移除元素
+zecard k #获取有序集合的个数
+zcount k start end #获取指定区间的元素个数
+```
+
+
+
+
+
+### ***特殊的数据类型***
+
+####  ***Geospatial地理位置***
+
+
+
+> geoadd
+
+​			
+
+<h4>
+    <a href="http://www.redis.cn/commands/geoadd.html">geoadd的官方中文文档</a>
+</h4>
+
+
+
+- 有效的经度从-180度到180度。
+- 有效的纬度从-85.05112878度到85.05112878度。
+
+```bash
+#gadd 添加地理位置
+#规则：两极无法添加 
+127.0.0.1:6379> geoadd china:city 166.40 39.90 beijing
+(integer) 1
+127.0.0.1:6379> geoadd china:city 121.37 31.23 shanghai
+(integer) 1
+127.0.0.1:6379> geoadd china:city 106.50 29.53 chognqing
+(integer) 1
+127.0.0.1:6379> geoadd china:city 114.05 22.52 shenzhen
+(integer) 1
+127.0.0.1:6379> geoadd china:city 120.16 30.24 hangzhou
+(integer) 1
+127.0.0.1:6379> geoadd china:city 108.96 34.26 xian
+(integer) 1
+
+```
+
+​	
+
+> geopos		
+
+<h4>
+    <a href="http://www.redis.cn/commands/geopos.html">geopos的官方中文文档</a>
+</h4>
+
+
+
+```bash
+127.0.0.1:6379> geopos china:city beijing
+1) 1) "166.40000134706497192"
+   2) "39.90000009167092543"
+127.0.0.1:6379> geopos china:city shenzhen
+1) 1) "114.04999762773513794"
+   2) "22.5200000879503861"
+
+```
+
+
+
+> geodist
+
+<h4><a href="http://www.redis.cn/commands/geodist.html">geodist的官方中文文档</a></h4>
+
+
+
+```bash
+127.0.0.1:6379> geodist china:city beijing hangzhou
+"4294076.3382"
+127.0.0.1:6379> geodist china:city beijing shanghai
+"4141170.7983"
+127.0.0.1:6379> geodist china:city beijing shanghai km
+"4141.1708"
+```
+
+
+
+> georadius
+
+<h4><a href="http://www.redis.cn/commands/georadius.html">geodius的官方中文文档</a></h4>
+
+附近的人（获取所有人的地址，定位，通过半径来查询）
+
+
+
+```bash
+127.0.0.1:6379> georadius china:city 110 30 500 km
+1) "chognqing"
+2) "xian"
+127.0.0.1:6379> georadius china:city 110 30 500 km withdist
+1) 1) "chognqing"
+   2) "341.9374"
+2) 1) "xian"
+   2) "483.8340"
+127.0.0.1:6379> georadius china:city 110 30 500 km withcoord
+1) 1) "chognqing"
+   2) 1) "106.49999767541885376"
+      2) "29.52999957900659211"
+2) 1) "xian"
+   2) 1) "108.96000176668167114"
+      2) "34.25999964418929977"
+127.0.0.1:6379> georadius china:city 110 30 500 km withdist withcoord count 2
+1) 1) "chognqing"
+   2) "341.9374"
+   3) 1) "106.49999767541885376"
+      2) "29.52999957900659211"
+2) 1) "xian"
+   2) "483.8340"
+   3) 1) "108.96000176668167114"
+      2) "34.25999964418929977"
+127.0.0.1:6379> georadius china:city 110 30 500 km withdist withcoord count 1
+1) 1) "chognqing"
+   2) "341.9374"
+   3) 1) "106.49999767541885376"
+      2) "29.52999957900659211"
+
+```
+
+
+
+> georadiusbymember
+
+<h4><a href="http://www.redis.cn/commands/georadiusbymember.html">geodiusbymember的官方中文文档</a></h4>
+
+
+
+```bahs
+127.0.0.1:6379> GEORADIUSBYMEMBER china:city shanghai 1000 km withcoord withdist count 2
+1) 1) "shanghai"
+   2) "0.0000"
+   3) 1) "121.36999815702438354"
+      2) "31.22999903975783553"
+2) 1) "hangzhou"
+   2) "159.7064"
+   3) 1) "120.1600000262260437"
+      2) "30.2400003229490224"
+
+```
+
+
+
+> geohash
+
+<h4><a href="http://www.redis.cn/commands/geohash.html">geohash的官方中文文档</a></h4>
+
+
+
+```bash
+127.0.0.1:6379> geohash china:city beijing chongqing
+1) "xxn6fx8f350"
+2) (nil)
+127.0.0.1:6379> geohash china:city beijing shanghai
+1) "xxn6fx8f350"
+2) "wtw39v4zvv0"
+
+```
+
+
+
+> geo的底层原理就是Zset!我们可以使用Zset命令操作geo集合
+
+```bash
+127.0.0.1:6379> ZRANGE china:city 0 -1 
+1) "chognqing"
+2) "xian"
+3) "shenzhen"
+4) "hangzhou"
+5) "shanghai"
+6) "beijing"
+127.0.0.1:6379> zrem china:city beijing
+(integer) 1
+127.0.0.1:6379> ZRANGE china:city 0 -1 
+1) "chognqing"
+2) "xian"
+3) "shenzhen"
+4) "hangzhou"
+5) "shanghai"
+```
+
+
+
+#### ***Hyperloglog***
+
+> 什么是基数（数据集中的不重复的元素）
+
+Redis Hyperloglog  基数统计的算法
+
+优点：占用的内存是固定的，2^64不同的元素的基数，只需要12kb的内存！如果从内存的角度来比较的话 Hyperloglog首选
+
+```bash
+127.0.0.1:6379> pfadd mykey a b c d e f g h i j #创建key
+(integer) 1
+127.0.0.1:6379> pfcount mykey
+(integer) 10
+127.0.0.1:6379> pfadd mykey2 i j k l m n
+(integer) 1
+127.0.0.1:6379> pfcount mykey2
+(integer) 6
+127.0.0.1:6379> PFMERGE mykey3 mykey mykey2
+OK
+127.0.0.1:6379> pfcount mykey3
+(integer) 14
+
+```
+
+如果允许容错，那么一定可以使用Hyperloglog
+
+
+
+#### ***Bitmaps***
+
+> 位存储
+
+统计用户信息，活跃，不活跃！登录，未登录
+
+Bitmap 位图 ，数据结构 都是操作二进制位来进行记录 就只有0和1的状态
+
+```bash
+#使用bitmaps来记录一周的打卡
+127.0.0.1:6379> setbit sign 0 0
+(integer) 0
+127.0.0.1:6379> setbit sign 2 1
+(integer) 0
+127.0.0.1:6379> setbit sign 3 1
+(integer) 0
+127.0.0.1:6379> setbit sign 4 1
+(integer) 0
+127.0.0.1:6379> setbit sign 5 1
+(integer) 0
+127.0.0.1:6379> setbit sign 6 1
+(integer) 0
+#查看某一天的打卡
+127.0.0.1:6379> getbit sign 4
+(integer) 1
+127.0.0.1:6379> getbit sign 0
+(integer) 0
+#统计打卡的天数
+127.0.0.1:6379> BITCOUNT sign
+(integer) 5
+
+```
+
+
+
+## **事务**
+
+Redis事务的本质：一组命令的集合
+
+Redis事务中没有隔离级别的概念
+
+==Redis的单条命令保存原子性，但是事务不保证原子性==
+
+redis的事务：
+
+- 开启事务（）
+- 命令入队（）
+- 执行事务
+
+#### ***正常执行事务***
+
+```bash
+127.0.0.1:6379> multi
+OK
+127.0.0.1:6379> flushdb
+QUEUED
+127.0.0.1:6379> set k2 v2
+QUEUED
+127.0.0.1:6379> get k2
+QUEUED
+127.0.0.1:6379> set k3 v3
+QUEUED
+127.0.0.1:6379> exec
+1) OK
+2) OK
+3) "v2"
+4) OK
+```
+
+#### ***放弃事务***
+
+```bash
+127.0.0.1:6379> multi
+OK
+127.0.0.1:6379> set k4 v4
+QUEUED
+127.0.0.1:6379> set k5 v5
+QUEUED
+127.0.0.1:6379> get k5
+QUEUED
+127.0.0.1:6379> discard  #放弃事务，事务队列中的事务都不会被执行
+OK
+127.0.0.1:6379> get k4
+(nil)
+
+```
+
+#### ***编译时异常***
+
+编译时出现异常那么都不会执行
+
+```bash
+127.0.0.1:6379> multi
+OK
+127.0.0.1:6379> set k1 v1
+QUEUED
+127.0.0.1:6379> set k2 v2
+QUEUED
+127.0.0.1:6379> getset k1 v2
+QUEUED
+127.0.0.1:6379> getsetk2 v1
+(error) ERR unknown command `getsetk2`, with args beginning with: `v1`, 
+127.0.0.1:6379> getset k2
+(error) ERR wrong number of arguments for 'getset' command
+127.0.0.1:6379> exec
+(error) EXECABORT Transaction discarded because of previous errors.
+127.0.0.1:6379> get k1
+(nil)
+```
+
+
+
+#### ***运行时异常***
+
+符合语法当时运行时出现异常，依旧正常执行成功
+
+```bash
+127.0.0.1:6379> set k1 "v1"
+OK
+127.0.0.1:6379> multi
+OK
+127.0.0.1:6379> incr k1  #执行失败
+QUEUED
+127.0.0.1:6379> set k2 v2 #执行成功
+QUEUED
+127.0.0.1:6379> set k3 v3#执行成功
+QUEUED
+127.0.0.1:6379> get k3#执行成功
+QUEUED
+127.0.0.1:6379> exec
+1) (error) ERR value is not an integer or out of range
+2) OK
+3) OK
+4) "v3"
+127.0.0.1:6379> get k3  #没有回滚
+"v3"
+127.0.0.1:6379> 
+```
+
+#### ***悲观锁***
+
+- 很悲观，认为什么时候都会出现问题，无论做什么都会加锁
+
+#### ***乐观锁***
+
+- 很乐观，人为什么时候都不会出问题，不会上锁！更新数据的时候去判断一下，在此期间是否有人修改过这个数据
+- 获取version
+- 更新时比较version
+
+#### ***Redis的测监视测试***
+
+```bash
+#正常执行成功
+127.0.0.1:6379> set money 100
+OK
+127.0.0.1:6379> set out 0
+OK
+127.0.0.1:6379> watch money
+OK
+127.0.0.1:6379> multi
+OK
+127.0.0.1:6379> DECRby money 20
+QUEUED
+127.0.0.1:6379> incrby money 20
+QUEUED
+127.0.0.1:6379> exec
+1) (integer) 80
+2) (integer) 100
+```
+
+#### ***测试多线程修改值，使用watch可以当做redis的乐观锁操作（面试常问）***
+
+```bash
+127.0.0.1:6379> watch money
+OK
+127.0.0.1:6379> multi
+OK
+127.0.0.1:6379> DECRby money 20
+QUEUED
+127.0.0.1:6379> INCRby out 20
+QUEUED
+127.0.0.1:6379> exec  #执行之前，另外一个线程修改了我们的值，执行失败
+(nil)
+
+```
+
+## **Jedis**
+
+> 什么是jedis 是Redis官方推荐的java连接开发工具！使用java操作Redis中间件！如果你要是用java操作redis，那么一定对jedis十分熟悉
+
+
+
+### ***测试***
+
+#### 1. 基本使用
+
+Jedis的基本使用非常简单，只需要创建Jedis对象的时候指定host，port, password即可。当然，Jedis对象又很多构造方法，都大同小异，只是对应和Redis连接的socket的参数不一样而已。
+
+
+
+```csharp
+Jedis jedis = new Jedis("localhost", 6379);  //指定Redis服务Host和port
+jedis.auth("xxxx"); //如果Redis服务连接需要密码，制定密码
+String value = jedis.get("key"); //访问Redis服务
+jedis.close(); //使用完关闭连接
+```
+
+Jedis基本使用十分简单，在每次使用时，构建Jedis对象即可。在Jedis对象构建好之后，Jedis底层会打开一条Socket通道和Redis服务进行连接。所以在使用完Jedis对象之后，需要调用Jedis.close()方法把连接关闭，不如会占用系统资源。当然，如果应用非常平凡的创建和销毁Jedis对象，对应用的性能是很大影响的，因为构建Socket的通道是很耗时的(类似数据库连接)。我们应该使用连接池来减少Socket对象的创建和销毁过程。
+
+#### 2. 连接池使用
+
+Jedis连接池是基于apache-commons pool2实现的。在构建连接池对象的时候，需要提供池对象的配置对象，及JedisPoolConfig(继承自GenericObjectPoolConfig)。我们可以通过这个配置对象对连接池进行相关参数的配置(如最大连接数，最大空数等)。
+
+
+
+```csharp
+JedisPoolConfig config = new JedisPoolConfig();
+config.setMaxIdle(8);
+config.setMaxTotal(18);
+JedisPool pool = new JedisPool(config, "127.0.0.1", 6379, 2000, "password");
+Jedis jedis = pool.getResource();
+String value = jedis.get("key");
+......
+jedis.close();
+pool.close();
+```
+
+使用Jedis连接池之后，在每次用完连接对象后一定要记得把连接归还给连接池。Jedis对close方法进行了改造，如果是连接池中的连接对象，调用Close方法将会是把连接对象返回到对象池，若不是则关闭连接。可以查看如下代码
+
+
+
+```kotlin
+@Override
+public void close() { //Jedis的close方法
+    if (dataSource != null) {
+        if (client.isBroken()) {
+            this.dataSource.returnBrokenResource(this);
+        } else {
+            this.dataSource.returnResource(this);
+        }
+    } else {
+        client.close();
+    }
+}
+
+//另外从对象池中获取Jedis链接时，将会对dataSource进行设置
+// JedisPool.getResource()方法
+public Jedis getResource() {
+    Jedis jedis = super.getResource();   
+    jedis.setDataSource(this);
+    return jedis;
+}
+```
+
+#### 3. 高可用连接
+
+我们知道，连接池可以大大提高应用访问Reids服务的性能，减去大量的Socket的创建和销毁过程。但是Redis为了保障高可用，服务一般都是Sentinel部署方式([可以查看我的文章详细了解](https://www.jianshu.com/p/cbd40a188226))。当Redis服务中的主服务挂掉之后，会仲裁出另外一台Slaves服务充当Master。这个时候，我们的应用即使使用了Jedis连接池，Master服务挂了，我们的应用奖还是无法连接新的Master服务。为了解决这个问题，Jedis也提供了相应的Sentinel实现，能够在Redis Sentinel主从切换时候，通知我们的应用，把我们的应用连接到新的 Master服务。先看下怎么使用。
+
+> 注意：Jedis版本必须2.4.2或更新版本
+
+
+
+```csharp
+Set<String> sentinels = new HashSet<>();
+sentinels.add("172.18.18.207:26379");
+sentinels.add("172.18.18.208:26379");
+JedisPoolConfig config = new JedisPoolConfig();
+config.setMaxIdle(5);
+config.setMaxTotal(20);
+JedisSentinelPool pool = new JedisSentinelPool("mymaster", sentinels, config);
+Jedis jedis = pool.getResource();
+jedis.set("jedis", "jedis");
+......
+jedis.close();
+pool.close();
+```
+
+Jedis Sentinel的使用也是十分简单的，只是在JedisPool中添加了Sentinel和MasterName参数。Jedis Sentinel底层基于Redis订阅实现Redis主从服务的切换通知。当Reids发生主从切换时，Sentinel会发送通知主动通知Jedis进行连接的切换。JedisSentinelPool在每次从连接池中获取链接对象的时候，都要对连接对象进行检测，如果此链接和Sentinel的Master服务连接参数不一致，则会关闭此连接，重新获取新的Jedis连接对象。
+
+
+
+```java
+public Jedis getResource() {
+    while (true) {
+        Jedis jedis = super.getResource();
+        jedis.setDataSource(this);
+
+        // get a reference because it can change concurrently
+        final HostAndPort master = currentHostMaster;
+        final HostAndPort connection = new HostAndPort(jedis.getClient().getHost(), jedis.getClient().getPort());
+        if (master.equals(connection)) {
+            // connected to the correct master
+            return jedis;
+        } else {
+            returnBrokenResource(jedis);
+        }
+    }
+}
+```
+
+当然，JedisSentinelPool对象要时时监控RedisSentinel的主从切换。在其内部通过Reids的订阅实现。具体的实现看JedisSentinelPool的两个方法就很清晰
+
+
+
+```dart
+private HostAndPort initSentinels(Set<String> sentinels, final String masterName) {
+    HostAndPort master = null;
+    boolean sentinelAvailable = false;
+    log.info("Trying to find master from available Sentinels...");
+    for (String sentinel : sentinels) {
+        final HostAndPort hap = HostAndPort.parseString(sentinel);
+        log.fine("Connecting to Sentinel " + hap);
+        Jedis jedis = null;
+        try {
+            jedis = new Jedis(hap.getHost(), hap.getPort());
+            //从RedisSentinel中获取Master信息
+            List<String> masterAddr = jedis.sentinelGetMasterAddrByName(masterName);
+            sentinelAvailable = true; // connected to sentinel...
+            if (masterAddr == null || masterAddr.size() != 2) {
+                log.warning("Can not get master addr, master name: " + masterName + ". Sentinel: " + hap + ".");
+                continue;
+            }
+            master = toHostAndPort(masterAddr);
+            log.fine("Found Redis master at " + master);
+            break;
+        } catch (JedisException e) {
+            // it should handle JedisException there's another chance of raising JedisDataException
+            log.warning("Cannot get master address from sentinel running @ " + hap + ". Reason: " + e + ". Trying next one.");
+        } finally {
+            if (jedis != null) {
+                jedis.close();
+            }
+        }
+    }
+    if (master == null) {
+        if (sentinelAvailable) {
+            // can connect to sentinel, but master name seems to not monitored
+            throw new JedisException("Can connect to sentinel, but " + masterName + " seems to be not monitored...");
+        } else {
+            throw new JedisConnectionException("All sentinels down, cannot determine where is " + masterName + " master is running...");
+        }
+    }
+    log.info("Redis master running at " + master + ", starting Sentinel listeners...");
+    //启动后台线程监控RedisSentinal的主从切换通知
+    for (String sentinel : sentinels) {
+        final HostAndPort hap = HostAndPort.parseString(sentinel);
+        MasterListener masterListener = new MasterListener(masterName, hap.getHost(), hap.getPort());
+        // whether MasterListener threads are alive or not, process can be stopped
+        masterListener.setDaemon(true);
+        masterListeners.add(masterListener);
+        masterListener.start();
+    }
+    return master;
+}
+
+
+private void initPool(HostAndPort master) {
+    if (!master.equals(currentHostMaster)) {
+        currentHostMaster = master;
+        if (factory == null) {
+            factory = new JedisFactory(master.getHost(), master.getPort(), connectionTimeout, soTimeout, password, database, clientName, false, null, null, null);
+            initPool(poolConfig, factory);
+        } else {
+            factory.setHostAndPort(currentHostMaster);
+            // although we clear the pool, we still have to check the returned object
+            // in getResource, this call only clears idle instances, not
+            // borrowed instances
+            internalPool.clear();
+        }
+        log.info("Created JedisPool to master at " + master);
+    }
+}
+```
+
+可以看到，JedisSentinel的监控时使用MasterListener这个对象来实现的。看对应源码可以发现是基于Redis的订阅实现的，其订阅频道为"+switch-master"。当MasterListener接收到switch-master消息时候，会使用新的Host和port进行initPool。这样对连接池中的连接对象清除，重新创建新的连接指向新的Master服务。
+
+#### 4. 客户端分片
+
+对于大应用来说，单台Redis服务器肯定满足不了应用的需求。在Redis3.0之前，是不支持集群的。如果要使用多台Reids服务器，必须采用其他方式。很多公司使用了代理方式来解决Redis集群。对于Jedis，也提供了客户端分片的模式来连接“Redis集群”。其内部是采用Key的一致性hash算法来区分key存储在哪个Redis实例上的。
+
+
+
+```csharp
+JedisPoolConfig config = new JedisPoolConfig();
+config.setMaxTotal(500);
+config.setTestOnBorrow(true);
+List<JedisShardInfo> jdsInfoList = new ArrayList<>(2);
+jdsInfoList.add(new JedisShardInfo("192.168.2.128", 6379));
+jdsInfoList.add(new JedisShardInfo("192.168.2.108", 6379));
+pool = new ShardedJedisPool(config, jdsInfoList, Hashing.MURMUR_HASH, Sharded.DEFAULT_KEY_TAG_PATTERN);
+jds.set(key, value);
+......
+jds.close();
+pool.close();
+```
+
+当然，采用这种方式也存在两个问题
+
+1. 扩容问题：
+    因为使用了一致性哈稀进行分片，那么不同的key分布到不同的Redis-Server上，当我们需要扩容时，需要增加机器到分片列表中，这时候会使得同样的key算出来落到跟原来不同的机器上，这样如果要取某一个值，会出现取不到的情况。
+2. 单点故障问题：
+    当集群中的某一台服务挂掉之后，客户端在根据一致性hash无法从这台服务器取数据。
+
+对于扩容问题，Redis的作者提出了一种名为Pre-Sharding的方式。即事先部署足够多的Redis服务。
+ 对于单点故障问题，我们可以使用Redis的HA高可用来实现。利用Redis-Sentinal来通知主从服务的切换。当然，Jedis没有实现这块。我将会在下一篇文章进行介绍。
+
+## ***SpringBoot整合***
+
+SpringBoot 操作数据：spring-data jpa jdbc mongodb redis
+
+SpringData 也是和 SpringBoot 齐名的项目！
+
+说明: 在SpringBoot2.x版本后，原来使用的jedis被替换为了lettuce
+
+Jedis使用的是直连，多个线程操作的话，是不安全的，使用jedis pool连接池！BIO
+
+lettuce：采用netty，实例可以在多个线程中进行共享，不存在线程不安全的情况！可以减少线程数量
+
+#### ***自己配置RedisTemplate模板***
+
+```java
+@Configuration
+public class RedisConfig {
+
+    @Bean
+    public RedisTemplate<String,Object> redisTemplate(RedisConnectionFactory redisConnectionFactory){
+
+        //一般直接使用<StringObject>類型
+        RedisTemplate<String,Object> template = new RedisTemplate<>();
+
+        //連接工廠
+        template.setConnectionFactory(redisConnectionFactory);
+
+        //序列化配置
+        Jackson2JsonRedisSerializer<Object> objectJackson2JsonRedisSerializer = new Jackson2JsonRedisSerializer<Object>(Object.class);
+
+        template.setKeySerializer(objectJackson2JsonRedisSerializer);
+
+        //序列化配置
+
+        //Json的序列化配置
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
+        objectMapper.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL);
+        objectJackson2JsonRedisSerializer.setObjectMapper(objectMapper);
+
+        //String 的序列化
+        StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
+
+        //key采用String的序列化方式
+        template.setKeySerializer(stringRedisSerializer);
+        //hash的key采用String
+        template.setHashKeySerializer(stringRedisSerializer);
+        //value采用Json
+        template.setValueSerializer(objectJackson2JsonRedisSerializer);
+        //hash的valuec采用Json
+        template.setHashValueSerializer(objectJackson2JsonRedisSerializer);
+
+        template.afterPropertiesSet();
+
+        return template;
+
+    }
+```
+
+#### ***Redis.conf详解***
+
+##### **单位**
+
+![image-20200715110422244](C:\Users\58max\AppData\Roaming\Typora\typora-user-images\image-20200715110422244.png)
+
+1.配置文件对大小写不敏感
+
+##### ****
+
+##### ***可以包含其他配置文件（可以把多个redis配置文件配置过来）***
+
+![image-20200715110551421](C:\Users\58max\AppData\Roaming\Typora\typora-user-images\image-20200715110551421.png)
+
+
+
+##### ***NetWork***
+
+
+
+###### 1.绑定的ip地址（表示访问的ip限制）
+
+![](C:\Users\58max\AppData\Roaming\Typora\typora-user-images\image-20200715110650542.png)
+
+
+
+###### 2.是否保护模式（默认开启）
+
+![image-20200715110707526](C:\Users\58max\AppData\Roaming\Typora\typora-user-images\image-20200715110707526.png)
+
+
+
+###### 3.绑定的端口号设置
+
+![image-20200715110719082](C:\Users\58max\AppData\Roaming\Typora\typora-user-images\image-20200715110719082.png)
+
+
+
+##### 通用设置
+
+
+
+###### 是否以守护进程的方式运行（默认是no）
+
+![image-20200715111124027](C:\Users\58max\AppData\Roaming\Typora\typora-user-images\image-20200715111124027.png)
+
+
+
+###### 如果以后台的方式运行我们需要指定进程文件
+
+![image-20200715111227668](C:\Users\58max\AppData\Roaming\Typora\typora-user-images\image-20200715111227668.png)
+
+
+
+###### 日志
+
+![image-20200715111301999](C:\Users\58max\AppData\Roaming\Typora\typora-user-images\image-20200715111301999.png)
+
+
+
+###### 日志的生成文件名
+
+![image-20200715111359081](C:\Users\58max\AppData\Roaming\Typora\typora-user-images\image-20200715111359081.png)
+
+
+
+###### 数据库的数量
+
+![image-20200715111429781](C:\Users\58max\AppData\Roaming\Typora\typora-user-images\image-20200715111429781.png)
+
+
+
+###### 是否总是显示loggo（默认是yes）
+
+![image-20200715111456896](C:\Users\58max\AppData\Roaming\Typora\typora-user-images\image-20200715111456896.png)
+
+
+
+
+
+##### ***快照***
+
+###### 持久化，在规定时间内执行多少次，则会持久化到文件 .rdb .aof文件
+
+redis是内存数据库，如果没有持久化，那么数据断电及失
+
+![image-20200715160622399](C:\Users\58max\AppData\Roaming\Typora\typora-user-images\image-20200715160622399.png)
+
+如果900内，如果有1个key进行了修改就进行持久化操作
+
+300s内，如果有10个key进行了修改就进行持久化操作
+
+60s内,如果有10000个key进行了修改就进行持久化操作
+
+可以自己定义这个
+
+
+
+
+
+###### 持久化出错是否还要进行工作 默认开启
+
+![image-20200715160850922](C:\Users\58max\AppData\Roaming\Typora\typora-user-images\image-20200715160850922.png)
+
+
+
+###### 是否压缩rdb文件 默认开启 需要消耗cpu资源
+
+![image-20200715160914331](C:\Users\58max\AppData\Roaming\Typora\typora-user-images\image-20200715160914331.png)
+
+
+
+###### 是否保存rdb文件是进行检查校验
+
+![image-20200715161031740](C:\Users\58max\AppData\Roaming\Typora\typora-user-images\image-20200715161031740.png)
+
+
+
+###### rdb文件保存的目录
+
+![image-20200715161111414](C:\Users\58max\AppData\Roaming\Typora\typora-user-images\image-20200715161111414.png)
+
+
+
+##### 安全
+
+###### config set  requirepass “”设置密码
+
+###### config get requirepass 获取密码
+
+##### 
+
+##### 客户端限制
+
+![image-20200715161715172](C:\Users\58max\AppData\Roaming\Typora\typora-user-images\image-20200715161715172.png)
+
+maxclients 10000默认这些 可以通过配置设置
+
+
+
+##### Redis默认最大内存配置
+
+![image-20200715161849726](C:\Users\58max\AppData\Roaming\Typora\typora-user-images\image-20200715161849726.png)
+
+
+
+##### 内存到达上限的处理策略
+
+![image-20200715161948726](C:\Users\58max\AppData\Roaming\Typora\typora-user-images\image-20200715161948726.png)
+
+==maxmemory-policy 六种方式==
+
+==1、volatile-lru：只对设置了过期时间的key进行LRU（默认值）== 
+
+==2、allkeys-lru ： 删除lru算法的key==
+
+==3、volatile-random：随机删除即将过期key==  
+
+==4、allkeys-random：随机删除==  
+
+==5、volatile-ttl ： 删除即将过期的==  
+
+==6、noeviction ： 永不过期，返回错误==
+
+
+
+##### aof配置（默认不开启aof配置，默认rdb配置，大部分情况下rdb）
+
+![image-20200715162417508](C:\Users\58max\AppData\Roaming\Typora\typora-user-images\image-20200715162417508.png)
+
+
+
+###### aof文件名字
+
+![image-20200715162509623](C:\Users\58max\AppData\Roaming\Typora\typora-user-images\image-20200715162509623.png)
+
+
+
+###### 同步设置
+
+![image-20200715162630389](C:\Users\58max\AppData\Roaming\Typora\typora-user-images\image-20200715162630389.png)
+
+
+
+always每次修改都会同步
+
+eversec 每秒执行一次 可能会丢失这一秒的数据
+
+no 不执行,操作系统会自己同步数据，速度最快
+
+
+
+### Redis的持久化
+
+
+
+#### RDB（Redis DataBase）
+
+##### 1.什么是RDB
+
+在主从复制中，Rdb为了备用的！在从机上面
+
+
+
+![image-20200715163907281](C:\Users\58max\AppData\Roaming\Typora\typora-user-images\image-20200715163907281.png)
+
+==在指定的时间间隔内将内存中的数据集快照写入磁盘，也就是行话讲的Snapshot快照，它恢复时是将快照文件直接读到内存里。
+　　Redis会单独创建（fork）一个子进程来进行持久化，会先将数据写入到一个临时文件中，待持久化过程都结束了，再用这个临时文件替换上次持久化好的文件。整个过程中，主进程是不进行任何IO操作的。
+这就确保了极高的性能。如果需要进行大规模数据的恢复，且对于数据恢复的完整性不是非常敏感，那RDB方式要比AOF方式更加的高效。RDB的缺点是最后一次持久化后的数据可能丢失。我们默认的就是RDB，一般情况下不需要修改这个配置！有时候在生产环境我们会将这个文件进行备份！rdb保存的文件是dump.rdb 都是在我们的配置文件中快照中进行配置的！==
+
+
+
+我们可以通过修改配置文件来自定义文件名称
+
+![image-20200715164632036](C:\Users\58max\AppData\Roaming\Typora\typora-user-images\image-20200715164632036.png)
+
+##### 2.触发机制
+
+==在以下三种情况下,备份就自动生成一个 dump.rdb==
+
+1. ==save的规则满足的情况下，会自动触发rdb规则==
+2. ==执行 flushall 命令，也会触发我们的rdb规则！==
+3. ==退出redis，也会产生 rdb 文件!==
+
+
+
+#### 　3.如何恢复rdb文件
+
+1. 只需要将rdb文件放在我们redis启动目录就可以，redis启动的时候会自动检查dump.rdb 恢复其中的数据！
+
+2. 查看需要存在的位置
+
+   ```bash
+   127.0.0.1:6379> config get dir
+   1) "dir"
+   2) "/usr/local/bin" 　　　　# 如果在这个目录下存在 dump.rdb 文件，启动就会自动恢复其中的数据
+   ```
+
+##### 优点：
+
+1.适合大规模的数据恢复！dump.rdb
+
+2.对数据的完整性要求不高
+
+##### 缺点：
+
+ 1.需要一定的时间间隔进行操作！如果redis意外的宕机，这个最后一次修改数据没有了
+
+2.fork进程的时候占用一定的内存空间
+
+
+
+#### AOF（Append Only File）
+
+将我们的所有命令都记录下来
+
+![image-20200715170214411](C:\Users\58max\AppData\Roaming\Typora\typora-user-images\image-20200715170214411.png)
+
+
+
+以日志的形式来记录每个操作，将Redis执行过的所有指令记录下来（不记录读操作），只许追加文件但不可以改写文件，redis启动之初会读取改文件重新构建数据，换言之，redis重启就会根据日志文件的内容将写的指令从头到尾执行一次，来完成数据的恢复工作。
+
+![image-20200715170702424](C:\Users\58max\AppData\Roaming\Typora\typora-user-images\image-20200715170702424.png)
+
+
+
+==当aof文件出现问题的时候，我可以通过redis-check-aof文件来修复 aof文件，通过使用redis-check-aof -- fixed 文件名==
+
+
+
+##### Aof的重写（默认文件的无限制的追加）
+
+![image-20200715173023375](C:\Users\58max\AppData\Roaming\Typora\typora-user-images\image-20200715173023375.png)
+
+重写规则说明如果aof文件大于64m，太大了！父进程会fork一个新的进程来将我们的文件进行重写
+
+
+
+###### 优点：
+
+1.每一次修改都同步，文件的完整会更好
+
+2.每秒同步一次，可能会丢失一秒的数据
+
+3.从不同步，效率最高
+
+###### 缺点：
+
+1.相对于数据文件来说，aof远远大于rdb，修复速度也比rdb慢
+
+2.Aof的运行效率也要比rdb慢，所以我们默认的配置是rdb持久化
+
+
+
+#### Redis的发布订阅
+
+
+
+Redis 发布订阅(pub/sub)是一种消息通信模式：发送者(pub)发送消息，订阅者(sub)接收消息。
+
+Redis 客户端可以订阅任意数量的频道。
+
+下图展示了频道 channel1 ， 以及订阅这个频道的三个客户端 —— client2 、 client5 和 client1 之间的关系：
+
+![img](https://www.runoob.com/wp-content/uploads/2014/11/pubsub1.png)
+
+当有新消息通过 PUBLISH 命令发送给频道 channel1 时， 这个消息就会被发送给订阅它的三个客户端：
+
+![img](https://www.runoob.com/wp-content/uploads/2014/11/pubsub2.png)
+
+##### Redis 发布订阅命令
+
+下表列出了 redis 发布订阅常用命令：
+
+| 序号 | 命令及描述                                                   |
+| :--- | :----------------------------------------------------------- |
+| 1    | [PSUBSCRIBE pattern [pattern ...\]](https://www.runoob.com/redis/pub-sub-psubscribe.html) 订阅一个或多个符合给定模式的频道。 |
+| 2    | [PUBSUB subcommand [argument [argument ...\]]](https://www.runoob.com/redis/pub-sub-pubsub.html) 查看订阅与发布系统状态。 |
+| 3    | [PUBLISH channel message](https://www.runoob.com/redis/pub-sub-publish.html) 将信息发送到指定的频道。 |
+| 4    | [PUNSUBSCRIBE [pattern [pattern ...\]]](https://www.runoob.com/redis/pub-sub-punsubscribe.html) 退订所有给定模式的频道。 |
+| 5    | [SUBSCRIBE channel [channel ...\]](https://www.runoob.com/redis/pub-sub-subscribe.html) 订阅给定的一个或多个频道的信息。 |
+| 6    | [UNSUBSCRIBE [channel [channel ...\]]](https://www.runoob.com/redis/pub-sub-unsubscribe.html) 指退订给定的频道。 |
+
+> 测试
+
+订阅端:
+
+```bash
+127.0.0.1:6379> SUBSCRIBE max  #订阅一个频道
+Reading messages... (press Ctrl-C to quit)
+1) "subscribe"
+2) "max"
+3) (integer) 1
+#等待读取推送的信息
+1) "message" #消息  
+2) "max"   #频道
+3) "Thissi58max" #消息的内容
+1) "message"
+2) "max"
+3) "hello,max"
+```
+
+发送端
+
+```bash
+27.0.0.1:6379> PUBLISH max Thissi58max #发布者发布消息到频道
+(integer) 1
+127.0.0.1:6379> PUBLISH max "hello,max"
+(integer) 1
+```
+
+##### Redis的发布订阅的原理
+
+**Pub/Sub 底层存储结构**
+
+**订阅 Channel**
+
+在 Redis 的底层结构中，客户端和频道的订阅关系是通过一个字典加链表的结构保存的，形式如下：
+
+![image-20200715193442802](C:\Users\58max\AppData\Roaming\Typora\typora-user-images\image-20200715193442802.png)
+
+在 Redis 的底层结构中，Redis 服务器结构体中定义了一个 pubsub_channels 字典
+
+struct redisServer { //用于保存所有频道的订阅关系 dict *pubsub_channels;}
+
+在这个字典中，key 代表的是频道名称，value 是一个链表，这个链表里面存放的是所有订阅这个频道的客户端。
+
+所以当有客户端执行订阅频道的动作的时候，服务器就会将客户端与被订阅的频道在 pubsub_channels 字典中进行关联。
+
+这个时候有两种情况：
+
+该渠道是首次被订阅：首次被订阅说明在字典中并不存在该渠道的信息，那么程序首先要创建一个对应的 key，并且要赋值一个空链表，然后将对应的客户端加入到链表中。此时链表只有一个元素。
+
+该渠道已经被其他客户端订阅过：这个时候就直接将对应的客户端信息添加到链表的末尾就好了。
+
+比如，如果有一个新的客户端 Client 08 要订阅 run 渠道，那么上图就会变成
+
+[![img](https://s5.51cto.com/oss/202001/02/b5e3fbbf939ed11a370ebfe17719d650.jpg-wh_600x-s_842340977.jpg)](https://s5.51cto.com/oss/202001/02/b5e3fbbf939ed11a370ebfe17719d650.jpg-wh_600x-s_842340977.jpg)
+
+如果 Client 08 要订阅一个新的渠道 new_sport ，那么就会变成
+
+[![img](https://s3.51cto.com/oss/202001/02/9f4960a456d03c1bffeb7af2f49356f1.jpg-wh_600x-s_156865536.jpg)](https://s3.51cto.com/oss/202001/02/9f4960a456d03c1bffeb7af2f49356f1.jpg-wh_600x-s_156865536.jpg)
+
+整个订阅的过程可以采用下面伪代码来实现
+
+```
+Map<String, List<Object>> pubsub_channels = new HashMap<>();     public void subscribe(String[] subscribeList, Object client) {         //遍历所有订阅的 channel，检查是否在 pubsub_channels 中，不在则创建新的 key 和空链表         for (int i = 0; i < subscribeList.length; i++) {             if (!pubsub_channels.containsKey(subscribeList[i])) {                 pubsub_channels.put(subscribeList[i], new ArrayList<>());             }             pubsub_channels.get(subscribeList[i]).add(client);         }     } 
+```
+
+**取消订阅**
+
+上面介绍的是单个 Channel 的订阅，相反的如果一个客户端要取消订阅相关 Channel，则无非是找到对应的 Channel 的链表，从中删除对应的客户端，如果该客户端已经是最后一个了，则将对应 Channel 也删除。
+
+```
+public void unSubscribe(String[] subscribeList, Object client) {         //遍历所有订阅的 channel，依次删除         for (int i = 0; i < subscribeList.length; i++) {             pubsub_channels.get(subscribeList[i]).remove(client);             //如果长度为 0 则清楚 channel             if (pubsub_channels.get(subscribeList[i]).size() == 0) {                 remove(subscribeList[i]);             }         }     } 
+```
+
+**模式订阅结构**
+
+模式渠道的订阅与单个渠道的订阅类似，不过服务器是将所有模式的订阅关系都保存在服务器状态的pubsub_patterns 属性里面。
+
+```
+struct redisServer{     //保存所有模式订阅关系     list *pubsub_patterns; } 
+```
+
+与订阅单个 Channel 不同的是，pubsub_patterns 属性是一个链表，不是字典。节点的结构如下：
+
+```
+struct pubsubPattern{     //订阅模式的客户端     redisClient *client;     //被订阅的模式     robj *pattern; } pubsubPattern; 
+```
+
+其实 client 属性是用来存放对应客户端信息，pattern 是用来存放客户端对应的匹配模式。
+
+所以对应上面的 Client-06 模式匹配的结构存储如下
+
+[![img](https://s2.51cto.com/oss/202001/02/50e7889258a17edcb147e5b68e3f339f.jpg-wh_600x-s_4285663027.jpg)](https://s2.51cto.com/oss/202001/02/50e7889258a17edcb147e5b68e3f339f.jpg-wh_600x-s_4285663027.jpg)
+
+在pubsub_patterns链表中有一个节点，对应的客户端是 Client-06，对应的匹配模式是run*。
+
+**订阅模式**
+
+当某个客户端通过命令psubscribe 订阅对应模式的 Channel 时候，服务器会创建一个节点，并将 Client 属性设置为对应的客户端，pattern 属性设置成对应的模式规则，然后添加到链表尾部。
+
+对应的伪代码如下：
+
+```
+List<PubSubPattern> pubsub_patterns = new ArrayList<>();     public void psubscribe(String[] subscribeList, Object client) {         //遍历所有订阅的 channel，创建节点         for (int i = 0; i < subscribeList.length; i++) {             PubSubPattern pubSubPattern = new PubSubPattern();             pubSubPattern.client = client;             pubSubPattern.pattern = subscribeList[i];             pubsub_patterns.add(pubSubPattern);         }     } 
+```
+
+1. 创建新节点;
+2. 给节点的属性赋值;
+3. 将节点添加到链表的尾部;
+
+**退订模式**
+
+退订模式的命令是punsubscribe，客户端使用这个命令来退订一个或者多个模式 Channel。服务器接收到该命令后，会遍历pubsub_patterns链表，将匹配到的 client 和 pattern 属性的节点给删掉。这里需要判断 client 属性和 pattern 属性都合法的时候再进行删除。
+
+伪代码如下：
+
+```
+public void punsubscribe(String[] subscribeList, Object client) {         //遍历所有订阅的 channel 相同 client 和 pattern 属性的节点会删除         for (int i = 0; i < subscribeList.length; i++) {             for (int j = 0; j < pubsub_patterns.size(); j++) {                 if (pubsub_patterns.get(j).client == client                 && pubsub_patterns.get(j).pattern == subscribeList[i]) {                     remove(pubsub_patterns);                 }             }         }     } 
+```
+
+遍历所有的节点，当匹配到相同 client 属性和 pattern 属性的时候就进行节点删除。
+
+**发布消息**
+
+发布消息比较好容易理解，当一个客户端执行了publish channelName message 命令的时候，服务器会从pubsub_channels和pubsub_patterns 两个结构中找到符合channelName 的所有 Channel，进行消息的发送。在 pubsub_channels 中只要找到对应的 Channel 的 key 然后向对应的 value 链表中的客户端发送消息就好。
+
+
+
+#### Redis主从复制
+
+##### Redis主从复制的原理
+
+在Redis集群中，让若干个Redis服务器去复制另一个Redis服务器，我们定义被复制的服务器为主服务器（master），而对主服务器进行复制的服务器则被称为从服务器（slave），这种模式叫做主从复制模式。
+
+> 数据流向是单向的，只能是从master到slave
+>
+> 一个slave只能有一个master
+
+##### 主从复制的作用
+
+
+
+- 为数据提供多个副本，实现高可用
+- 实现读写分离（主节点负责写数据，从节点负责读数据，主节点定期把数据同步到从节点保证数据的一致性）
+
+##### 主从复制的方式
+
+- 命令slaveof。
+  优点：无需重启。缺点：不便于管理
+
+```
+// 命令行使用
+slaveof ip port // 使用命令后自身数据会被清空，但取消slave只是停止复制，并不清空复制代码
+```
+
+
+
+- 修改配置。
+  优点：统一配置。缺点：需要重启
+
+```
+// 配置文件中配置
+slaveof ip port
+slave-read-only yes //只允许从节点进行读操作复制代码
+```
+
+
+
+##### 全量复制
+
+用于初次复制或其它无法进行部分复制的情况，将主节点中的所有数据都发送给从节点，是一个非常重型的操作，当数据量较大时，会对主从节点和网络造成很大的开销
+
+![Redis全量复制过程](https://user-gold-cdn.xitu.io/2019/9/6/16d040af5cbf6270?imageView2/0/w/1280/h/960/format/webp/ignore-error/1)
+
+##### 全量复制过程：
+
+1. Redis内部会发出一个同步命令，刚开始是Psync命令，Psync ? -1表示要求master主机同步数据
+2. 主机会向从机发送run_id和offset，因为slave并没有对应的 offset，所以是全量复制
+3. 从机slave会保存主机master的基本信息
+4. 主节点收到全量复制的命令后，执行bgsave（异步执行），在后台生成RDB文件（快照），并使用一个缓冲区（称为复制缓冲区）记录从现在开始执行的所有写命令
+5. 主机发送RDB文件给从机
+6. 发送缓冲区数据
+7. 刷新旧的数据。==从节点在载入主节点的数据之前要先将老数据清除==
+8. 加载RDB文件将数据库状态更新至主节点执行bgsave时的数据库状态和缓冲区数据的加载。
+
+##### 全量复制开销
+
+
+
+- 主节点需要bgsave
+- RDB文件网络传输占用网络io
+- 从节点要清空数据
+- 从节点加载RDB
+- 全量复制会触发从节点AOF重写
+
+##### 部分复制
+
+部分复制是Redis 2.8以后出现的，用于处理在主从复制中因网络闪断等原因造成的数据丢失场景，当从节点再次连上主节点后，如果条件允许，主节点会补发丢失数据给从节点。因为补发的数据远远小于全量数据，可以有效避免全量复制的过高开销，需要注意的是，如果网络中断时间过长，造成主节点没有能够完整地保存中断期间执行的写命令，则无法进行部分复制，仍使用全量复制
+
+![Redis部分复制过程](https://user-gold-cdn.xitu.io/2019/9/6/16d040b1f2e9d283?imageView2/0/w/1280/h/960/format/webp/ignore-error/1)
+
+##### 部分复制过程：
+
+1. 如果网络抖动（连接断开 connection lost）
+2. 主机master 还是会写 repl*back*buffer（复制缓冲区）
+3. 从机slave 会继续尝试连接主机
+4. 从机slave 会把自己当前 run_id 和偏移量传输给主机 master，并且执行 pysnc 命令同步
+5. 如果master发现你的偏移量是在缓冲区的范围内，就会返回 continue命令
+6. 同步了offset的部分数据，所以部分复制的基础就是偏移量 offset。
+
+> 服务器运行ID(run*id)：每个Redis节点(无论主从)，在启动时都会自动生成一个随机ID(每次启动都不一样)，由40个随机的十六进制字符组成；run*id用来唯一识别一个Redis节点。 通过info server命令，可以查看节点的run_id。
+
+##### 环境配置
+
+只配置从库，不配置主库
+
+```bash
+#查看当前库的信息
+127.0.0.1:6379> info replication
+# Replication
+role:master #角色
+connected_slaves:0 #从机数量
+master_replid:6b8331f81378878b3191c663d0e82471b3ccc8ef
+master_replid2:0000000000000000000000000000000000000000
+master_repl_offset:0
+second_repl_offset:-1
+repl_backlog_active:0
+repl_backlog_size:1048576
+repl_backlog_first_byte_offset:0
+repl_backlog_histlen:0
+```
+
+配置从库的信息
+
+1.端口号：port
+
+2.pid名字：pidfilename：
+
+3.日志文件名字：logfile
+
+4.rdb文件名字：dump
+
+```bash
+root@58max:/usr/local/bin/maxconfig# ps -ef | grep redis
+root      4752     1  0 11:52 ?        00:00:00 redis-server 127.0.0.1:6380
+root      4765     1  0 11:53 ?        00:00:00 redis-server 127.0.0.1:6381
+root      4774  4625  0 11:54 pts/3    00:00:00 grep --color=auto redis
+999      24858 24831  0 Jul12 ?        00:10:34 redis-server *:6379
+
+```
+
+修改完成之后启动三个reids
+
+每个reids都默认是主机
+
+命令配置从机需要认老大（slaveof ip port）这里的配置是暂时的
+
+```bash
+#从机
+127.0.0.1:6381> SLAVEOF 127.0.0.1 6379
+OK
+127.0.0.1:6381> info replication
+# Replication
+role:slave
+master_host:127.0.0.1
+master_port:6379
+master_link_status:down
+master_last_io_seconds_ago:-1
+master_sync_in_progress:0
+slave_repl_offset:1
+master_link_down_since_seconds:1594958667
+slave_priority:100
+slave_read_only:1
+connected_slaves:0
+master_replid:8815d3d7324652f8467d939b2baec489544ba31d
+master_replid2:0000000000000000000000000000000000000000
+master_repl_offset:0
+second_repl_offset:-1
+repl_backlog_active:0
+repl_backlog_size:1048576
+repl_backlog_first_byte_offset:0
+repl_backlog_histlen:0
+
+#从机
+127.0.0.1:6380> SLAVEOF 127.0.0.1 6379
+OK
+127.0.0.1:6380> info replication
+# Replication
+role:slave 
+master_host:127.0.0.1 
+master_port:6379 
+master_link_status:down 
+master_last_io_seconds_ago:-1 
+master_sync_in_progress:0
+slave_repl_offset:1
+master_link_down_since_seconds:1594958677
+slave_priority:100
+slave_read_only:1
+connected_slaves:0
+master_replid:90a9cf08e54f520f3b91829eb1d8b005251bc81d
+master_replid2:0000000000000000000000000000000000000000
+master_repl_offset:0
+second_repl_offset:-1
+repl_backlog_active:0
+repl_backlog_size:1048576
+repl_backlog_first_byte_offset:0
+repl_backlog_histlen:0
+
+#主机
+127.0.0.1:6379> info replication
+# Replication
+role:master
+connected_slaves:0
+master_replid:6b8331f81378878b3191c663d0e82471b3ccc8ef
+master_replid2:0000000000000000000000000000000000000000
+master_repl_offset:0
+second_repl_offset:-1
+repl_backlog_active:0
+repl_backlog_size:1048576
+repl_backlog_first_byte_offset:0
+repl_backlog_histlen:0
+
+
+```
+
+
+
+文件配置（这里的配置是永久的）
+
+> 细节
+
+主机可以写，总计不能写只能读！主机中所有信息都会被从机自动保存
+
+当主机宕机时，（在没有哨兵的情况下）不影响从机。当主机重新连接，从机依旧能获取到主机写入的信息。
+
+如果是使用命令行配置的主从，当从机重启时，就会变成主机
+
+
+
+
+
+
+
+##### 开发运维常见的问题
+
+
+
+1. 读写分离
+
+- 复制数据存在延迟（如果从节点发生阻塞）
+- 从节点可能发生故障
+
+1. 主从配置不一致
+
+- 例如maxmemory不一致，可能会造成丢失数据
+- 例如数据结构优化参数不一致：造成主从内存不一致
+
+1. 规避全量复制
+
+- 第一次全量复制不可避免，所以分片的maxmemory减小，同时选择在低峰（夜间）时，做全量复制。
+- 复制积压缓冲区不足
+  增大复制缓冲区配置rel*backlog*size
+
+> 例如如果网络中断的平均时间是60s，而主节点平均每秒产生的写命令(特定协议格式)所占的字节数为100KB，则复制积压缓冲区的平均需求为6MB，保险起见，可以设置为12MB，来保证绝大多数断线情况都可以使用部分复制。
+
+1. 复制风暴
+   master节点重启，master节点生成一份rdb文件，但是要给所有从节点发送rdb文件。对cpu，内存，带宽都造成很大的压力
+
+
+
+
+
+# 哨兵模式
+
+（当主机宕机时，自动选举老大的模式）
+
+## 1. Redis高可用概述
+
+在 `Web` 服务器中，**高可用** 是指服务器可以 **正常访问** 的时间，衡量的标准是在 **多长时间** 内可以提供正常服务（`99.9%`、`99.99%`、`99.999%` 等等）。在 `Redis` 层面，**高可用** 的含义要宽泛一些，除了保证提供 **正常服务**（如 **主从分离**、**快速容灾技术** 等），还需要考虑 **数据容量扩展**、**数据安全** 等等。
+
+在 `Redis` 中，实现 **高可用** 的技术主要包括 **持久化**、**复制**、**哨兵** 和 **集群**，下面简单说明它们的作用，以及解决了什么样的问题：
+
+- **持久化**：持久化是 **最简单的** 高可用方法。它的主要作用是 **数据备份**，即将数据存储在 **硬盘**，保证数据不会因进程退出而丢失。
+- **复制**：复制是高可用 `Redis` 的基础，**哨兵** 和 **集群** 都是在 **复制基础** 上实现高可用的。复制主要实现了数据的多机备份以及对于读操作的负载均衡和简单的故障恢复。缺陷是故障恢复无法自动化、写操作无法负载均衡、存储能力受到单机的限制。
+- **哨兵**：在复制的基础上，哨兵实现了 **自动化** 的 **故障恢复**。缺陷是 **写操作** 无法 **负载均衡**，**存储能力** 受到 **单机** 的限制。
+- **集群**：通过集群，`Redis` 解决了 **写操作** 无法 **负载均衡** 以及 **存储能力** 受到 **单机限制** 的问题，实现了较为 **完善** 的 **高可用方案**。
+
+
+
+
+## 2. Redis Sentinel的基本概念
+
+`Redis Sentinel` 是 `Redis` **高可用** 的实现方案。`Sentinel` 是一个管理多个 `Redis` 实例的工具，它可以实现对 `Redis` 的 **监控**、**通知**、**自动故障转移**。下面先对 `Redis Sentinel` 的 **基本概念** 进行简单的介绍。
+
+基本名词说明：
+
+| 基本名词         | 逻辑结构                   | 物理结构                            |
+| :--------------- | :------------------------- | :---------------------------------- |
+| Redis数据节点    | 主节点和从节点             | 主节点和从节点的进程                |
+| 主节点(master)   | Redis主数据库              | 一个独立的Redis进程                 |
+| 从节点(slave)    | Redis从数据库              | 一个独立的Redis进程                 |
+| Sentinel节点     | 监控Redis数据节点          | 一个独立的Sentinel进程              |
+| Sentinel节点集合 | 若干Sentinel节点的抽象组合 | 若干Sentinel节点进程                |
+| Redis Sentinel   | Redis高可用实现方案        | Sentinel节点集合和Redis数据节点进程 |
+| 应用客户端       | 泛指一个或多个客户端       | 一个或者多个客户端进程或者线程      |
+
+如图所示，`Redis` 的 **主从复制模式** 和 `Sentinel` **高可用架构** 的示意图：
+
+
+
+![img](https://user-gold-cdn.xitu.io/2018/8/22/16560ce611d8c4a5?imageView2/0/w/1280/h/960/format/webp/ignore-error/1)
+
+
+
+## 3. Redis主从复制的问题
+
+`Redis` **主从复制** 可将 **主节点** 数据同步给 **从节点**，从节点此时有两个作用：
+
+1. 一旦 **主节点宕机**，**从节点** 作为 **主节点** 的 **备份** 可以随时顶上来。
+2. 扩展 **主节点** 的 **读能力**，分担主节点读压力。
+
+
+
+![img](https://user-gold-cdn.xitu.io/2018/8/22/16560ce61dbb9d7e?imageView2/0/w/1280/h/960/format/webp/ignore-error/1)
+
+
+
+**主从复制** 同时存在以下几个问题：
+
+1. 一旦 **主节点宕机**，**从节点** 晋升成 **主节点**，同时需要修改 **应用方** 的 **主节点地址**，还需要命令所有 **从节点** 去 **复制** 新的主节点，整个过程需要 **人工干预**。
+2. **主节点** 的 **写能力** 受到 **单机的限制**。
+3. **主节点** 的 **存储能力** 受到 **单机的限制**。
+4. **原生复制** 的弊端在早期的版本中也会比较突出，比如：`Redis` **复制中断** 后，**从节点** 会发起 `psync`。此时如果 **同步不成功**，则会进行 **全量同步**，**主库** 执行 **全量备份** 的同时，可能会造成毫秒或秒级的 **卡顿**。
+
+## 4. Redis Sentinel深入探究
+
+### 4.1. Redis Sentinel的架构
+
+
+
+![img](https://user-gold-cdn.xitu.io/2018/8/22/16560ce61dbc4eeb?imageView2/0/w/1280/h/960/format/webp/ignore-error/1)
+
+
+
+### 4.2. Redis Sentinel的主要功能
+
+`Sentinel` 的主要功能包括 **主节点存活检测**、**主从运行情况检测**、**自动故障转移** （`failover`）、**主从切换**。`Redis` 的 `Sentinel` 最小配置是 **一主一从**。
+
+`Redis` 的 `Sentinel` 系统可以用来管理多个 `Redis` 服务器，该系统可以执行以下四个任务：
+
+- **监控**
+
+`Sentinel` 会不断的检查 **主服务器** 和 **从服务器** 是否正常运行。
+
+- **通知**
+
+当被监控的某个 `Redis` 服务器出现问题，`Sentinel` 通过 `API` **脚本** 向 **管理员** 或者其他的 **应用程序** 发送通知。
+
+- **自动故障转移**
+
+当 **主节点** 不能正常工作时，`Sentinel` 会开始一次 **自动的** 故障转移操作，它会将与 **失效主节点** 是 **主从关系** 的其中一个 **从节点** 升级为新的 **主节点**，并且将其他的 **从节点** 指向 **新的主节点**。
+
+- **配置提供者**
+
+在 `Redis Sentinel` 模式下，**客户端应用** 在初始化时连接的是 `Sentinel` **节点集合**，从中获取 **主节点** 的信息。
+
+### 4.3. 主观下线和客观下线
+
+默认情况下，**每个** `Sentinel` 节点会以 **每秒一次** 的频率对 `Redis` 节点和 **其它** 的 `Sentinel` 节点发送 `PING` 命令，并通过节点的 **回复** 来判断节点是否在线。
+
+- **主观下线**
+
+**主观下线** 适用于所有 **主节点** 和 **从节点**。如果在 `down-after-milliseconds` 毫秒内，`Sentinel` 没有收到 **目标节点** 的有效回复，则会判定 **该节点** 为 **主观下线**。
+
+- **客观下线**
+
+**客观下线** 只适用于 **主节点**。如果 **主节点** 出现故障，`Sentinel` 节点会通过 `sentinel is-master-down-by-addr` 命令，向其它 `Sentinel` 节点询问对该节点的 **状态判断**。如果超过 `<quorum>` 个数的节点判定 **主节点** 不可达，则该 `Sentinel` 节点会判断 **主节点** 为 **客观下线**。
+
+### 4.4. Sentinel的通信命令
+
+`Sentinel` 节点连接一个 `Redis` 实例的时候，会创建 `cmd` 和 `pub/sub` 两个 **连接**。`Sentinel` 通过 `cmd` 连接给 `Redis` 发送命令，通过 `pub/sub` 连接到 `Redis` 实例上的其他 `Sentinel` 实例。
+
+`Sentinel` 与 `Redis` **主节点** 和 **从节点** 交互的命令，主要包括：
+
+| 命令      | 作 用                                                        |
+| --------- | ------------------------------------------------------------ |
+| PING      | `Sentinel` 向 `Redis` 节点发送 `PING` 命令，检查节点的状态   |
+| INFO      | `Sentinel` 向 `Redis` 节点发送 `INFO` 命令，获取它的 **从节点信息** |
+| PUBLISH   | `Sentinel` 向其监控的 `Redis` 节点 `__sentinel__:hello` 这个 `channel` 发布 **自己的信息** 及 **主节点** 相关的配置 |
+| SUBSCRIBE | `Sentinel` 通过订阅 `Redis` **主节点** 和 **从节点** 的 `__sentinel__:hello` 这个 `channnel`，获取正在监控相同服务的其他 `Sentinel` 节点 |
+
+`Sentinel` 与 `Sentinel` 交互的命令，主要包括：
+
+| 命令                            | 作 用                                                        |
+| ------------------------------- | ------------------------------------------------------------ |
+| PING                            | `Sentinel` 向其他 `Sentinel` 节点发送 `PING` 命令，检查节点的状态 |
+| SENTINEL:is-master-down-by-addr | 和其他 `Sentinel` 协商 **主节点** 的状态，如果 **主节点** 处于 `SDOWN` 状态，则投票自动选出新的 **主节点** |
+
+### 4.5. Redis Sentinel的工作原理
+
+每个 `Sentinel` 节点都需要 **定期执行** 以下任务：
+
+- 每个 `Sentinel` 以 **每秒钟** 一次的频率，向它所知的 **主服务器**、**从服务器** 以及其他 `Sentinel` **实例** 发送一个 `PING` 命令。
+
+
+
+![img](https://user-gold-cdn.xitu.io/2018/8/22/16560ce61df44c4d?imageView2/0/w/1280/h/960/format/webp/ignore-error/1)
+
+
+
+1. 如果一个 **实例**（`instance`）距离 **最后一次** 有效回复 `PING` 命令的时间超过 `down-after-milliseconds` 所指定的值，那么这个实例会被 `Sentinel` 标记为 **主观下线**。
+
+
+
+![img](https://user-gold-cdn.xitu.io/2018/8/22/16560ce61dc739de?imageView2/0/w/1280/h/960/format/webp/ignore-error/1)
+
+
+
+1. 如果一个 **主服务器** 被标记为 **主观下线**，那么正在 **监视** 这个 **主服务器** 的所有 `Sentinel` 节点，要以 **每秒一次** 的频率确认 **主服务器** 的确进入了 **主观下线** 状态。
+
+
+
+![img](https://user-gold-cdn.xitu.io/2018/8/22/16560ce647a39535?imageView2/0/w/1280/h/960/format/webp/ignore-error/1)
+
+
+
+1. 如果一个 **主服务器** 被标记为 **主观下线**，并且有 **足够数量** 的 `Sentinel`（至少要达到 **配置文件** 指定的数量）在指定的 **时间范围** 内同意这一判断，那么这个 **主服务器** 被标记为 **客观下线**。
+
+
+
+![img](https://user-gold-cdn.xitu.io/2018/8/22/16560ce647c2583e?imageView2/0/w/1280/h/960/format/webp/ignore-error/1)
+
+
+
+1. 在一般情况下， 每个 `Sentinel` 会以每 `10` 秒一次的频率，向它已知的所有 **主服务器** 和 **从服务器** 发送 `INFO` 命令。当一个 **主服务器** 被 `Sentinel` 标记为 **客观下线** 时，`Sentinel` 向 **下线主服务器** 的所有 **从服务器** 发送 `INFO` 命令的频率，会从 `10` 秒一次改为 **每秒一次**。
+
+
+
+![img](https://user-gold-cdn.xitu.io/2018/8/22/16560ce6738a30db?imageView2/0/w/1280/h/960/format/webp/ignore-error/1)
+
+
+
+1. `Sentinel` 和其他 `Sentinel` 协商 **主节点** 的状态，如果 **主节点** 处于 `SDOWN` 状态，则投票自动选出新的 **主节点**。将剩余的 **从节点** 指向 **新的主节点** 进行 **数据复制**。
+
+
+
+![img](https://user-gold-cdn.xitu.io/2018/8/22/16560ce676a95a54?imageView2/0/w/1280/h/960/format/webp/ignore-error/1)
+
+
+
+1. 当没有足够数量的 `Sentinel` 同意 **主服务器** 下线时， **主服务器** 的 **客观下线状态** 就会被移除。当 **主服务器** 重新向 `Sentinel` 的 `PING` 命令返回 **有效回复** 时，**主服务器** 的 **主观下线状态** 就会被移除。
+
+
+
+![img](https://user-gold-cdn.xitu.io/2018/8/22/16560ce6759c1cb3?imageView2/0/w/1280/h/960/format/webp/ignore-error/1)
+
+
+
+> 注意：一个有效的 `PING` 回复可以是：`+PONG`、`-LOADING` 或者 `-MASTERDOWN`。如果 **服务器** 返回除以上三种回复之外的其他回复，又或者在 **指定时间** 内没有回复 `PING` 命令， 那么 `Sentinel` 认为服务器返回的回复 **无效**（`non-valid`）。
+
+## 5. Redis Sentinel搭建
+
+### 5.1. Redis Sentinel的部署须知
+
+1. 一个稳健的 `Redis Sentinel` 集群，应该使用至少 **三个** `Sentinel` 实例，并且保证讲这些实例放到 **不同的机器** 上，甚至不同的 **物理区域**。
+2. `Sentinel` 无法保证 **强一致性**。
+3. 常见的 **客户端应用库** 都支持 `Sentinel`。
+4. `Sentinel` 需要通过不断的 **测试** 和 **观察**，才能保证高可用。
+
+### 5.2. Redis Sentinel的配置文件
+
+```shell
+# 哨兵sentinel实例运行的端口，默认26379  
+port 26379
+# 哨兵sentinel的工作目录
+dir ./
+
+# 哨兵sentinel监控的redis主节点的 
+## ip：主机ip地址
+## port：哨兵端口号
+## master-name：可以自己命名的主节点名字（只能由字母A-z、数字0-9 、这三个字符".-_"组成。）
+## quorum：当这些quorum个数sentinel哨兵认为master主节点失联 那么这时 客观上认为主节点失联了  
+# sentinel monitor <master-name> <ip> <redis-port> <quorum>  
+sentinel monitor mymaster 127.0.0.1 6379 2
+
+# 当在Redis实例中开启了requirepass <foobared>，所有连接Redis实例的客户端都要提供密码。
+# sentinel auth-pass <master-name> <password>  
+sentinel auth-pass mymaster 123456  
+
+# 指定主节点应答哨兵sentinel的最大时间间隔，超过这个时间，哨兵主观上认为主节点下线，默认30秒  
+# sentinel down-after-milliseconds <master-name> <milliseconds>
+sentinel down-after-milliseconds mymaster 30000  
+
+# 指定了在发生failover主备切换时，最多可以有多少个slave同时对新的master进行同步。这个数字越小，完成failover所需的时间就越长；反之，但是如果这个数字越大，就意味着越多的slave因为replication而不可用。可以通过将这个值设为1，来保证每次只有一个slave，处于不能处理命令请求的状态。
+# sentinel parallel-syncs <master-name> <numslaves>
+sentinel parallel-syncs mymaster 1  
+
+# 故障转移的超时时间failover-timeout，默认三分钟，可以用在以下这些方面：
+## 1. 同一个sentinel对同一个master两次failover之间的间隔时间。  
+## 2. 当一个slave从一个错误的master那里同步数据时开始，直到slave被纠正为从正确的master那里同步数据时结束。  
+## 3. 当想要取消一个正在进行的failover时所需要的时间。
+## 4.当进行failover时，配置所有slaves指向新的master所需的最大时间。不过，即使过了这个超时，slaves依然会被正确配置为指向master，但是就不按parallel-syncs所配置的规则来同步数据了
+# sentinel failover-timeout <master-name> <milliseconds>  
+sentinel failover-timeout mymaster 180000
+
+# 当sentinel有任何警告级别的事件发生时（比如说redis实例的主观失效和客观失效等等），将会去调用这个脚本。一个脚本的最大执行时间为60s，如果超过这个时间，脚本将会被一个SIGKILL信号终止，之后重新执行。
+# 对于脚本的运行结果有以下规则：  
+## 1. 若脚本执行后返回1，那么该脚本稍后将会被再次执行，重复次数目前默认为10。
+## 2. 若脚本执行后返回2，或者比2更高的一个返回值，脚本将不会重复执行。  
+## 3. 如果脚本在执行过程中由于收到系统中断信号被终止了，则同返回值为1时的行为相同。
+# sentinel notification-script <master-name> <script-path>  
+sentinel notification-script mymaster /var/redis/notify.sh
+
+# 这个脚本应该是通用的，能被多次调用，不是针对性的。
+# sentinel client-reconfig-script <master-name> <script-path>
+sentinel client-reconfig-script mymaster /var/redis/reconfig.sh
+```
+
+### 5.3. Redis Sentinel的节点规划
+
+| 角色            | IP地址        | 端口号 |
+| :-------------- | :------------ | :----- |
+| Redis Master    | 10.206.20.231 | 16379  |
+| Redis Slave1    | 10.206.20.231 | 26379  |
+| Redis Slave2    | 10.206.20.231 | 36379  |
+| Redis Sentinel1 | 10.206.20.231 | 16380  |
+| Redis Sentinel2 | 10.206.20.231 | 26380  |
+| Redis Sentinel3 | 10.206.20.231 | 36380  |
+
+### 5.4. Redis Sentinel的配置搭建
+
+#### 5.4.1. Redis-Server的配置管理
+
+分别拷贝三份 `redis.conf` 文件到 `/usr/local/redis-sentinel` 目录下面。三个配置文件分别对应 `master`、`slave1` 和 `slave2` 三个 `Redis` 节点的 **启动配置**。
+
+```
+$ sudo cp /usr/local/redis-4.0.11/redis.conf /usr/local/redis-sentinel/redis-16379.conf
+$ sudo cp /usr/local/redis-4.0.11/redis.conf /usr/local/redis-sentinel/redis-26379.conf
+$ sudo cp /usr/local/redis-4.0.11/redis.conf /usr/local/redis-sentinel/redis-36379.conf
+复制代码
+```
+
+分别修改三份配置文件如下：
+
+- 主节点：redis-16379.conf
+
+```
+daemonize yes
+pidfile /var/run/redis-16379.pid
+logfile /var/log/redis/redis-16379.log
+port 16379
+bind 0.0.0.0
+timeout 300
+databases 16
+dbfilename dump-16379.db
+dir ./redis-workdir
+masterauth 123456
+requirepass 123456
+
+```
+
+- 从节点1：redis-26379.conf
+
+```
+daemonize yes
+pidfile /var/run/redis-26379.pid
+logfile /var/log/redis/redis-26379.log
+port 26379
+bind 0.0.0.0
+timeout 300
+databases 16
+dbfilename dump-26379.db
+dir ./redis-workdir
+masterauth 123456
+requirepass 123456
+slaveof 127.0.0.1 16379
+
+```
+
+- 从节点2：redis-36379.conf
+
+```
+daemonize yes
+pidfile /var/run/redis-36379.pid
+logfile /var/log/redis/redis-36379.log
+port 36379
+bind 0.0.0.0
+timeout 300
+databases 16
+dbfilename dump-36379.db
+dir ./redis-workdir
+masterauth 123456
+requirepass 123456
+slaveof 127.0.0.1 16379
+
+```
+
+> 如果要做 **自动故障转移**，建议所有的 `redis.conf` 都设置 `masterauth`。因为 **自动故障** 只会重写 **主从关系**，即 `slaveof`，不会自动写入 `masterauth`。如果 `Redis` 原本没有设置密码，则可以忽略。
+
+#### 5.4.2. Redis-Server启动验证
+
+按顺序分别启动 `16379`，`26379` 和 `36379` 三个 `Redis` 节点，启动命令和启动日志如下：
+
+`Redis` 的启动命令：
+
+```
+$ sudo redis-server /usr/local/redis-sentinel/redis-16379.conf
+$ sudo redis-server /usr/local/redis-sentinel/redis-26379.conf
+$ sudo redis-server /usr/local/redis-sentinel/redis-36379.conf
+
+```
+
+查看 `Redis` 的启动进程：
+
+```
+$ ps -ef | grep redis-server
+    0  7127     1   0  2:16下午 ??         0:01.84 redis-server 0.0.0.0:16379 
+    0  7133     1   0  2:16下午 ??         0:01.73 redis-server 0.0.0.0:26379 
+    0  7137     1   0  2:16下午 ??         0:01.70 redis-server 0.0.0.0:36379 
+
+```
+
+查看 `Redis` 的启动日志：
+
+- 节点 `redis-16379`
+
+```
+$ cat /var/log/redis/redis-16379.log 
+7126:C 22 Aug 14:16:38.907 # oO0OoO0OoO0Oo Redis is starting oO0OoO0OoO0Oo
+7126:C 22 Aug 14:16:38.908 # Redis version=4.0.11, bits=64, commit=00000000, modified=0, pid=7126, just started
+7126:C 22 Aug 14:16:38.908 # Configuration loaded
+7127:M 22 Aug 14:16:38.910 * Increased maximum number of open files to 10032 (it was originally set to 256).
+7127:M 22 Aug 14:16:38.912 * Running mode=standalone, port=16379.
+7127:M 22 Aug 14:16:38.913 # Server initialized
+7127:M 22 Aug 14:16:38.913 * Ready to accept connections
+7127:M 22 Aug 14:16:48.416 * Slave 127.0.0.1:26379 asks for synchronization
+7127:M 22 Aug 14:16:48.416 * Full resync requested by slave 127.0.0.1:26379
+7127:M 22 Aug 14:16:48.416 * Starting BGSAVE for SYNC with target: disk
+7127:M 22 Aug 14:16:48.416 * Background saving started by pid 7134
+7134:C 22 Aug 14:16:48.433 * DB saved on disk
+7127:M 22 Aug 14:16:48.487 * Background saving terminated with success
+7127:M 22 Aug 14:16:48.494 * Synchronization with slave 127.0.0.1:26379 succeeded
+7127:M 22 Aug 14:16:51.848 * Slave 127.0.0.1:36379 asks for synchronization
+7127:M 22 Aug 14:16:51.849 * Full resync requested by slave 127.0.0.1:36379
+7127:M 22 Aug 14:16:51.849 * Starting BGSAVE for SYNC with target: disk
+7127:M 22 Aug 14:16:51.850 * Background saving started by pid 7138
+7138:C 22 Aug 14:16:51.862 * DB saved on disk
+7127:M 22 Aug 14:16:51.919 * Background saving terminated with success
+7127:M 22 Aug 14:16:51.923 * Synchronization with slave 127.0.0.1:36379 succeeded
+
+```
+
+以下两行日志日志表明，`redis-16379` 作为 `Redis` 的 **主节点**，`redis-26379` 和 `redis-36379` 作为 **从节点**，从 **主节点** 同步数据。
+
+```
+7127:M 22 Aug 14:16:48.416 * Slave 127.0.0.1:26379 asks for synchronization
+7127:M 22 Aug 14:16:51.848 * Slave 127.0.0.1:36379 asks for synchronization
+
+```
+
+- 节点 `redis-26379`
+
+```
+$ cat /var/log/redis/redis-26379.log 
+7132:C 22 Aug 14:16:48.407 # oO0OoO0OoO0Oo Redis is starting oO0OoO0OoO0Oo
+7132:C 22 Aug 14:16:48.408 # Redis version=4.0.11, bits=64, commit=00000000, modified=0, pid=7132, just started
+7132:C 22 Aug 14:16:48.408 # Configuration loaded
+7133:S 22 Aug 14:16:48.410 * Increased maximum number of open files to 10032 (it was originally set to 256).
+7133:S 22 Aug 14:16:48.412 * Running mode=standalone, port=26379.
+7133:S 22 Aug 14:16:48.413 # Server initialized
+7133:S 22 Aug 14:16:48.413 * Ready to accept connections
+7133:S 22 Aug 14:16:48.413 * Connecting to MASTER 127.0.0.1:16379
+7133:S 22 Aug 14:16:48.413 * MASTER <-> SLAVE sync started
+7133:S 22 Aug 14:16:48.414 * Non blocking connect for SYNC fired the event.
+7133:S 22 Aug 14:16:48.414 * Master replied to PING, replication can continue...
+7133:S 22 Aug 14:16:48.415 * Partial resynchronization not possible (no cached master)
+7133:S 22 Aug 14:16:48.417 * Full resync from master: 211d3b4eceaa3af4fe5c77d22adf06e1218e0e7b:0
+7133:S 22 Aug 14:16:48.494 * MASTER <-> SLAVE sync: receiving 176 bytes from master
+7133:S 22 Aug 14:16:48.495 * MASTER <-> SLAVE sync: Flushing old data
+7133:S 22 Aug 14:16:48.496 * MASTER <-> SLAVE sync: Loading DB in memory
+7133:S 22 Aug 14:16:48.498 * MASTER <-> SLAVE sync: Finished with success
+
+```
+
+- 节点 `redis-36379`
+
+```
+$ cat /var/log/redis/redis-36379.log 
+7136:C 22 Aug 14:16:51.839 # oO0OoO0OoO0Oo Redis is starting oO0OoO0OoO0Oo
+7136:C 22 Aug 14:16:51.840 # Redis version=4.0.11, bits=64, commit=00000000, modified=0, pid=7136, just started
+7136:C 22 Aug 14:16:51.841 # Configuration loaded
+7137:S 22 Aug 14:16:51.843 * Increased maximum number of open files to 10032 (it was originally set to 256).
+7137:S 22 Aug 14:16:51.845 * Running mode=standalone, port=36379.
+7137:S 22 Aug 14:16:51.845 # Server initialized
+7137:S 22 Aug 14:16:51.846 * Ready to accept connections
+7137:S 22 Aug 14:16:51.846 * Connecting to MASTER 127.0.0.1:16379
+7137:S 22 Aug 14:16:51.847 * MASTER <-> SLAVE sync started
+7137:S 22 Aug 14:16:51.847 * Non blocking connect for SYNC fired the event.
+7137:S 22 Aug 14:16:51.847 * Master replied to PING, replication can continue...
+7137:S 22 Aug 14:16:51.848 * Partial resynchronization not possible (no cached master)
+7137:S 22 Aug 14:16:51.850 * Full resync from master: 211d3b4eceaa3af4fe5c77d22adf06e1218e0e7b:14
+7137:S 22 Aug 14:16:51.923 * MASTER <-> SLAVE sync: receiving 176 bytes from master
+7137:S 22 Aug 14:16:51.923 * MASTER <-> SLAVE sync: Flushing old data
+7137:S 22 Aug 14:16:51.924 * MASTER <-> SLAVE sync: Loading DB in memory
+7137:S 22 Aug 14:16:51.927 * MASTER <-> SLAVE sync: Finished with success
+
+```
+
+#### 5.4.3. Sentinel的配置管理
+
+分别拷贝三份 `redis-sentinel.conf` 文件到 `/usr/local/redis-sentinel` 目录下面。三个配置文件分别对应 `master`、`slave1` 和 `slave2` 三个 `Redis` 节点的 **哨兵配置**。
+
+```
+$ sudo cp /usr/local/redis-4.0.11/sentinel.conf /usr/local/redis-sentinel/sentinel-16380.conf
+$ sudo cp /usr/local/redis-4.0.11/sentinel.conf /usr/local/redis-sentinel/sentinel-26380.conf
+$ sudo cp /usr/local/redis-4.0.11/sentinel.conf /usr/local/redis-sentinel/sentinel-36380.conf
+
+```
+
+- 节点1：sentinel-16380.conf
+
+```
+protected-mode no
+bind 0.0.0.0
+port 16380
+daemonize yes
+sentinel monitor master 127.0.0.1 16379 2
+sentinel down-after-milliseconds master 5000
+sentinel failover-timeout master 180000
+sentinel parallel-syncs master 1
+sentinel auth-pass master 123456
+logfile /var/log/redis/sentinel-16380.log
+复制代码
+```
+
+- 节点2：sentinel-26380.conf
+
+```
+protected-mode no
+bind 0.0.0.0
+port 26380
+daemonize yes
+sentinel monitor master 127.0.0.1 16379 2
+sentinel down-after-milliseconds master 5000
+sentinel failover-timeout master 180000
+sentinel parallel-syncs master 1
+sentinel auth-pass master 123456
+logfile /var/log/redis/sentinel-26380.log
+
+```
+
+- 节点3：sentinel-36380.conf
+
+```
+protected-mode no
+bind 0.0.0.0
+port 36380
+daemonize yes
+sentinel monitor master 127.0.0.1 16379 2
+sentinel down-after-milliseconds master 5000
+sentinel failover-timeout master 180000
+sentinel parallel-syncs master 1
+sentinel auth-pass master 123456
+logfile /var/log/redis/sentinel-36380.log
+
+```
+
+#### 5.4.4. Sentinel启动验证
+
+按顺序分别启动 `16380`，`26380` 和 `36380` 三个 `Sentinel` 节点，启动命令和启动日志如下：
+
+```
+$ sudo redis-sentinel /usr/local/redis-sentinel/sentinel-16380.conf
+$ sudo redis-sentinel /usr/local/redis-sentinel/sentinel-26380.conf
+$ sudo redis-sentinel /usr/local/redis-sentinel/sentinel-36380.conf
+
+```
+
+查看 `Sentinel` 的启动进程：
+
+```
+$ ps -ef | grep redis-sentinel
+    0  7954     1   0  3:30下午 ??         0:00.05 redis-sentinel 0.0.0.0:16380 [sentinel] 
+    0  7957     1   0  3:30下午 ??         0:00.05 redis-sentinel 0.0.0.0:26380 [sentinel] 
+    0  7960     1   0  3:30下午 ??         0:00.04 redis-sentinel 0.0.0.0:36380 [sentinel] 
+
+```
+
+查看 `Sentinel` 的启动日志：
+
+- 节点 `sentinel-16380`
+
+```
+$ cat /var/log/redis/sentinel-16380.log 
+7953:X 22 Aug 15:30:27.245 # oO0OoO0OoO0Oo Redis is starting oO0OoO0OoO0Oo
+7953:X 22 Aug 15:30:27.245 # Redis version=4.0.11, bits=64, commit=00000000, modified=0, pid=7953, just started
+7953:X 22 Aug 15:30:27.245 # Configuration loaded
+7954:X 22 Aug 15:30:27.247 * Increased maximum number of open files to 10032 (it was originally set to 256).
+7954:X 22 Aug 15:30:27.249 * Running mode=sentinel, port=16380.
+7954:X 22 Aug 15:30:27.250 # Sentinel ID is 69d05b86a82102a8919231fd3c2d1f21ce86e000
+7954:X 22 Aug 15:30:27.250 # +monitor master master 127.0.0.1 16379 quorum 2
+7954:X 22 Aug 15:30:32.286 # +sdown sentinel fd166dc66425dc1d9e2670e1f17cb94fe05f5fc7 127.0.0.1 36380 @ master 127.0.0.1 16379
+7954:X 22 Aug 15:30:34.588 # -sdown sentinel fd166dc66425dc1d9e2670e1f17cb94fe05f5fc7 127.0.0.1 36380 @ master 127.0.0.1 16379
+
+```
+
+`sentinel-16380` 节点的 `Sentinel ID` 为 `69d05b86a82102a8919231fd3c2d1f21ce86e000`，并通过 `Sentinel ID` 把自身加入 `sentinel` 集群中。
+
+- 节点 `sentinel-26380`
+
+```
+$ cat /var/log/redis/sentinel-26380.log 
+7956:X 22 Aug 15:30:30.900 # oO0OoO0OoO0Oo Redis is starting oO0OoO0OoO0Oo
+7956:X 22 Aug 15:30:30.901 # Redis version=4.0.11, bits=64, commit=00000000, modified=0, pid=7956, just started
+7956:X 22 Aug 15:30:30.901 # Configuration loaded
+7957:X 22 Aug 15:30:30.904 * Increased maximum number of open files to 10032 (it was originally set to 256).
+7957:X 22 Aug 15:30:30.905 * Running mode=sentinel, port=26380.
+7957:X 22 Aug 15:30:30.906 # Sentinel ID is 21e30244cda6a3d3f55200bcd904d0877574e506
+7957:X 22 Aug 15:30:30.906 # +monitor master master 127.0.0.1 16379 quorum 2
+7957:X 22 Aug 15:30:30.907 * +slave slave 127.0.0.1:26379 127.0.0.1 26379 @ master 127.0.0.1 16379
+7957:X 22 Aug 15:30:30.911 * +slave slave 127.0.0.1:36379 127.0.0.1 36379 @ master 127.0.0.1 16379
+7957:X 22 Aug 15:30:36.311 * +sentinel sentinel fd166dc66425dc1d9e2670e1f17cb94fe05f5fc7 127.0.0.1 36380 @ master 127.0.0.1 16379
+
+```
+
+`sentinel-26380` 节点的 `Sentinel ID` 为 `21e30244cda6a3d3f55200bcd904d0877574e506`，并通过 `Sentinel ID` 把自身加入 `sentinel` 集群中。此时 `sentinel` 集群中已有 `sentinel-16380` 和 `sentinel-26380` 两个节点。
+
+- 节点 `sentinel-36380`
+
+```
+$ cat /var/log/redis/sentinel-36380.log 
+7959:X 22 Aug 15:30:34.273 # oO0OoO0OoO0Oo Redis is starting oO0OoO0OoO0Oo
+7959:X 22 Aug 15:30:34.274 # Redis version=4.0.11, bits=64, commit=00000000, modified=0, pid=7959, just started
+7959:X 22 Aug 15:30:34.274 # Configuration loaded
+7960:X 22 Aug 15:30:34.276 * Increased maximum number of open files to 10032 (it was originally set to 256).
+7960:X 22 Aug 15:30:34.277 * Running mode=sentinel, port=36380.
+7960:X 22 Aug 15:30:34.278 # Sentinel ID is fd166dc66425dc1d9e2670e1f17cb94fe05f5fc7
+7960:X 22 Aug 15:30:34.278 # +monitor master master 127.0.0.1 16379 quorum 2
+7960:X 22 Aug 15:30:34.279 * +slave slave 127.0.0.1:26379 127.0.0.1 26379 @ master 127.0.0.1 16379
+7960:X 22 Aug 15:30:34.283 * +slave slave 127.0.0.1:36379 127.0.0.1 36379 @ master 127.0.0.1 16379
+7960:X 22 Aug 15:30:34.993 * +sentinel sentinel 21e30244cda6a3d3f55200bcd904d0877574e506 127.0.0.1 26380 @ master 127.0.0.1 16379
+
+```
+
+`sentinel-36380` 节点的 `Sentinel ID` 为 `fd166dc66425dc1d9e2670e1f17cb94fe05f5fc7`，并通过 `Sentinel ID` 把自身加入 `sentinel` 集群中。此时 `sentinel` 集群中已有 `sentinel-16380`，`sentinel-26380` 和 `sentinel-36380` 三个节点。
+
+#### 5.4.5. Sentinel配置刷新
+
+- 节点1：sentinel-16380.conf
+
+`sentinel-16380.conf` 文件新生成如下的配置项：
+
+```
+# Generated by CONFIG REWRITE
+dir "/usr/local/redis-sentinel"
+sentinel config-epoch master 0
+sentinel leader-epoch master 0
+sentinel known-slave master 127.0.0.1 36379
+sentinel known-slave master 127.0.0.1 26379
+sentinel known-sentinel master 127.0.0.1 26380 21e30244cda6a3d3f55200bcd904d0877574e506
+sentinel known-sentinel master 127.0.0.1 36380 fd166dc66425dc1d9e2670e1f17cb94fe05f5fc7
+sentinel current-epoch 0
+
+```
+
+可以注意到，`sentinel-16380.conf` 刷新写入了 `Redis` 主节点关联的所有 **从节点** `redis-26379` 和 `redis-36379`，同时写入了其余两个 `Sentinel` 节点 `sentinel-26380` 和 `sentinel-36380` 的 `IP` 地址，**端口号** 和 `Sentinel ID`。
+
+```
+# Generated by CONFIG REWRITE
+dir "/usr/local/redis-sentinel"
+sentinel config-epoch master 0
+sentinel leader-epoch master 0
+sentinel known-slave master 127.0.0.1 26379
+sentinel known-slave master 127.0.0.1 36379
+sentinel known-sentinel master 127.0.0.1 36380 fd166dc66425dc1d9e2670e1f17cb94fe05f5fc7
+sentinel known-sentinel master 127.0.0.1 16380 69d05b86a82102a8919231fd3c2d1f21ce86e000
+sentinel current-epoch 0
+
+```
+
+可以注意到，`sentinel-26380.conf` 刷新写入了 `Redis` 主节点关联的所有 **从节点** `redis-26379` 和 `redis-36379`，同时写入了其余两个 `Sentinel` 节点 `sentinel-36380` 和 `sentinel-16380` 的 `IP` 地址，**端口号** 和 `Sentinel ID`。
+
+```
+# Generated by CONFIG REWRITE
+dir "/usr/local/redis-sentinel"
+sentinel config-epoch master 0
+sentinel leader-epoch master 0
+sentinel known-slave master 127.0.0.1 36379
+sentinel known-slave master 127.0.0.1 26379
+sentinel known-sentinel master 127.0.0.1 16380 69d05b86a82102a8919231fd3c2d1f21ce86e000
+sentinel known-sentinel master 127.0.0.1 26380 21e30244cda6a3d3f55200bcd904d0877574e506
+sentinel current-epoch 0
+
+```
+
+可以注意到，`sentinel-36380.conf` 刷新写入了 `Redis` 主节点关联的所有 **从节点** `redis-26379` 和 `redis-36379`，同时写入了其余两个 `Sentinel` 节点 `sentinel-16380` 和 `sentinel-26380` 的 `IP` 地址，**端口号** 和 `Sentinel ID`。
+
+#### 5.5. Sentinel时客户端命令
+
+- 检查其他 `Sentinel` 节点的状态，返回 `PONG` 为正常。
+
+```
+> PING sentinel
+
+```
+
+- 显示被监控的所有 **主节点** 以及它们的状态。
+
+```
+> SENTINEL masters
+
+```
+
+- 显示指定 **主节点** 的信息和状态。
+
+```
+> SENTINEL master <master_name>
+
+```
+
+- 显示指定 **主节点** 的所有 **从节点** 以及它们的状态。
+
+```
+> SENTINEL slaves <master_name>
+
+```
+
+返回指定 **主节点** 的 `IP` 地址和 **端口**。如果正在进行 `failover` 或者 `failover` 已经完成，将会显示被提升为 **主节点** 的 **从节点** 的 `IP` 地址和 **端口**。
+
+```
+> SENTINEL get-master-addr-by-name <master_name>
+
+```
+
+- 重置名字匹配该 **正则表达式** 的所有的 **主节点** 的状态信息，清除它之前的 **状态信息**，以及 **从节点** 的信息。
+
+```
+> SENTINEL reset <pattern>
+
+```
+
+- 强制当前 `Sentinel` 节点执行 `failover`，并且不需要得到其他 `Sentinel` 节点的同意。但是 `failover` 后会将 **最新的配置** 发送给其他 `Sentinel` 节点。
+
+```
+SENTINEL failover <master_name>
+
+```
+
+## 6. Redis Sentinel故障切换与恢复
+
+### 6.1. Redis CLI客户端跟踪
+
+上面的日志显示，`redis-16379` 节点为 **主节点**，它的进程 `ID` 为 `7127`。为了模拟 `Redis` 主节点故障，强制杀掉这个进程。
+
+```
+$ kill -9 7127
+
+```
+
+使用 `redis-cli` 客户端命令进入 `sentinel-16380` 节点，查看 `Redis` **节点** 的状态信息。
+
+```
+$ redis-cli -p 16380
+
+```
+
+- 查看 `Redis` 主从集群的 **主节点** 信息。可以发现 `redis-26379` 晋升为 **新的主节点**。
+
+```
+127.0.0.1:16380> SENTINEL master master
+ 1) "name"
+ 2) "master"
+ 3) "ip"
+ 4) "127.0.0.1"
+ 5) "port"
+ 6) "26379"
+ 7) "runid"
+ 8) "b8ca3b468a95d1be5efe1f50c50636cafe48c59f"
+ 9) "flags"
+10) "master"
+11) "link-pending-commands"
+12) "0"
+13) "link-refcount"
+14) "1"
+15) "last-ping-sent"
+16) "0"
+17) "last-ok-ping-reply"
+18) "588"
+19) "last-ping-reply"
+20) "588"
+21) "down-after-milliseconds"
+22) "5000"
+23) "info-refresh"
+24) "9913"
+25) "role-reported"
+26) "master"
+27) "role-reported-time"
+28) "663171"
+29) "config-epoch"
+30) "1"
+31) "num-slaves"
+32) "2"
+33) "num-other-sentinels"
+34) "2"
+35) "quorum"
+36) "2"
+37) "failover-timeout"
+38) "180000"
+39) "parallel-syncs"
+40) "1"
+
+```
+
+### 6.2. Redis Sentinel日志跟踪
+
+查看任意 `Sentinel` 节点的日志如下：
+
+```
+7954:X 22 Aug 18:40:22.504 # +tilt #tilt mode entered
+7954:X 22 Aug 18:40:32.197 # +tilt #tilt mode entered
+7954:X 22 Aug 18:41:02.241 # -tilt #tilt mode exited
+7954:X 22 Aug 18:48:24.550 # +sdown master master 127.0.0.1 16379
+7954:X 22 Aug 18:48:24.647 # +new-epoch 1
+7954:X 22 Aug 18:48:24.651 # +vote-for-leader fd166dc66425dc1d9e2670e1f17cb94fe05f5fc7 1
+7954:X 22 Aug 18:48:25.678 # +odown master master 127.0.0.1 16379 #quorum 3/2
+7954:X 22 Aug 18:48:25.678 # Next failover delay: I will not start a failover before Wed Aug 22 18:54:24 2018
+7954:X 22 Aug 18:48:25.709 # +config-update-from sentinel fd166dc66425dc1d9e2670e1f17cb94fe05f5fc7 127.0.0.1 36380 @ master 127.0.0.1 16379
+7954:X 22 Aug 18:48:25.710 # +switch-master master 127.0.0.1 16379 127.0.0.1 26379
+7954:X 22 Aug 18:48:25.710 * +slave slave 127.0.0.1:36379 127.0.0.1 36379 @ master 127.0.0.1 26379
+7954:X 22 Aug 18:48:25.711 * +slave slave 127.0.0.1:16379 127.0.0.1 16379 @ master 127.0.0.1 26379
+7954:X 22 Aug 18:48:30.738 # +sdown slave 127.0.0.1:16379 127.0.0.1 16379 @ master 127.0.0.1 26379
+7954:X 22 Aug 19:38:23.479 # -sdown slave 127.0.0.1:16379 127.0.0.1 16379 @ master 127.0.0.1 26379
+
+```
+
+- 分析日志，可以发现 `redis-16329` 节点先进入 `sdown` **主观下线** 状态。
+
+```
++sdown master master 127.0.0.1 16379
+
+```
+
+- 哨兵检测到 `redis-16329` 出现故障，`Sentinel` 进入一个 **新纪元**，从 `0` 变为 `1`。
+
+```
++new-epoch 1
+
+```
+
+- 三个 `Sentinel` 节点开始协商 **主节点** 的状态，判断其是否需要 **客观下线**。
+
+```
++vote-for-leader fd166dc66425dc1d9e2670e1f17cb94fe05f5fc7 1
+
+```
+
+- 超过 `quorum` 个数的 `Sentinel` 节点认为 **主节点** 出现故障，`redis-16329` 节点进入 **客观下线** 状态。
+
+```
++odown master master 127.0.0.1 16379 #quorum 3/2
+
+```
+
+- `Sentinal` 进行 **自动故障切换**，协商选定 `redis-26329` 节点作为新的 **主节点**。
+
+```
++switch-master master 127.0.0.1 16379 127.0.0.1 26379
+
+```
+
+- `redis-36329` 节点和已经 **客观下线** 的 `redis-16329` 节点成为 `redis-26479` 的 **从节点**。
+
+```
+7954:X 22 Aug 18:48:25.710 * +slave slave 127.0.0.1:36379 127.0.0.1 36379 @ master 127.0.0.1 26379
+7954:X 22 Aug 18:48:25.711 * +slave slave 127.0.0.1:16379 127.0.0.1 16379 @ master 127.0.0.1 26379
+
+```
+
+### 6.3. Redis的配置文件
+
+分别查看三个 `redis` 节点的配置文件，发生 **主从切换** 时 `redis.conf` 的配置会自动发生刷新。
+
+- 节点 redis-16379
+
+```
+daemonize yes
+pidfile "/var/run/redis-16379.pid"
+logfile "/var/log/redis/redis-16379.log"
+port 16379
+bind 0.0.0.0
+timeout 300
+databases 16
+dbfilename "dump-16379.db"
+dir "/usr/local/redis-sentinel/redis-workdir"
+masterauth "123456"
+requirepass "123456"
+
+```
+
+- 节点 redis-26379
+
+```
+daemonize yes
+pidfile "/var/run/redis-26379.pid"
+logfile "/var/log/redis/redis-26379.log"
+port 26379
+bind 0.0.0.0
+timeout 300
+databases 16
+dbfilename "dump-26379.db"
+dir "/usr/local/redis-sentinel/redis-workdir"
+masterauth "123456"
+requirepass "123456"
+
+```
+
+- 节点 redis-36379
+
+```
+daemonize yes
+pidfile "/var/run/redis-36379.pid"
+logfile "/var/log/redis/redis-36379.log"
+port 36379
+bind 0.0.0.0
+timeout 300
+databases 16
+dbfilename "dump-36379.db"
+dir "/usr/local/redis-sentinel/redis-workdir"
+masterauth "123456"
+requirepass "123456"
+slaveof 127.0.0.1 26379
+
+```
+
+> **分析**：`redis-26379` 节点 `slaveof` 配置被移除，晋升为 **主节点**。`redis-16379` 节点处于 **宕机状态**。`redis-36379` 的 `slaveof` 配置更新为 `127.0.0.1 redis-26379`，成为 `redis-26379` 的 **从节点**。
+
+重启节点 `redis-16379`。待正常启动后，再次查看它的 `redis.conf` 文件，配置如下：
+
+```
+daemonize yes
+pidfile "/var/run/redis-16379.pid"
+logfile "/var/log/redis/redis-16379.log"
+port 16379
+bind 0.0.0.0
+timeout 300
+databases 16
+dbfilename "dump-16379.db"
+dir "/usr/local/redis-sentinel/redis-workdir"
+masterauth "123456"
+requirepass "123456"
+# Generated by CONFIG REWRITE
+slaveof 127.0.0.1 26379
+
+```
+
+节点 `redis-16379` 的配置文件新增一行 `slaveof` 配置属性，指向 `redis-26379`，即成为 **新的主节点** 的 **从节点**。
+
+# 小结
+
+本文首先对 `Redis` 实现高可用的几种模式做出了阐述，指出了 `Redis` **主从复制** 的不足之处，进一步引入了 `Redis Sentinel` **哨兵模式** 的相关概念，深入说明了 `Redis Sentinel` 的 **具体功能**，**基本原理**，**高可用搭建** 和 **自动故障切换** 验证等。
+
+当然，`Redis Sentinel` 仅仅解决了 **高可用** 的问题，对于 **主节点** 单点写入和单节点无法扩容等问题，还需要引入 `Redis Cluster` **集群模式** 予以解决。
+
+
+
+#### Redis缓存穿透和雪崩
+
+## 缓存穿透
+
+### 什么是缓存穿透
+
+正常情况下，查询的数据都存在，如果请求一个不存在的数据，也就是缓存和数据库都查不到这个数据，每次都会去数据库查询，这种查询不存在数据的现象我们称为缓存穿透
+
+### 穿透带来的问题
+
+如果每次都拿一个不存在的id去查询数据库，可能会导致你的数据库压力增大
+
+### 解决办法
+
+1. 缓存空值 
+    之所以发生穿透，是因为缓存中没有存储这些数据的key，从而每次都查询数据库 
+   我们可以为这些key在缓存中设置对应的值为null，后面查询这个key的时候就不用查询数据库了 
+   当然为了健壮性，我们要对这些key设置过期时间，以防止真的有数据
+2. BloomFilter 
+   BloomFilter 类似于一个hbase set 用来判断某个元素（key）是否存在于某个集合中 
+   我们把有数据的key都放到BloomFilter中，每次查询的时候都先去BloomFilter判断，如果没有就直接返回null 
+   注意BloomFilter没有删除操作，对于删除的key，查询就会经过BloomFilter然后查询缓存再查询数据库，所以BloomFilter可以结合缓存空值用，对于删除的key，可以在缓存中缓存null
+
+## 缓存击穿
+
+### 什么是缓存击穿
+
+在高并发的情况下，大量的请求同时查询同一个key时，此时这个key正好失效了，就会导致同一时间，这些请求都会去查询数据库，这样的现象我们称为缓存击穿
+
+### 击穿带来的问题
+
+会造成某一时刻数据库请求量过大
+
+### 解决办法
+
+采用分布式锁，只有拿到锁的第一个线程去请求数据库，然后插入缓存，当然每次拿到锁的时候都要去查询一下缓存有没有
+
+## 缓存雪崩
+
+### 什么是缓存雪崩
+
+当某一时刻发生大规模的缓存失效的情况，比如你的缓存服务宕机了
+
+### 解决办法
+
+1. 采用集群，降低服务宕机的概率
+2. ehcache本地缓存 + Hystrix限流&降级 
+   ehcache 本地缓存的目的也是考虑在 Redis Cluster 完全不可用的时候，ehcache 本地缓存还能够支撑一阵 
+   使用 Hystrix进行限流 & 降级 ，比如一秒来了5000个请求，我们可以设置假设只能有一秒 2000个请求能通过这个组件，那么其他剩余的 3000 请求就会走限流逻辑
+
+## 解决热点数据集中失效问题
+
+我们在设置缓存的时候，一般会给缓存设置一个失效时间，过了这个时间，缓存就失效了。 
+对于一些热点的数据来说，当缓存失效以后会存在大量的请求过来，然后打到数据库去，从而可能导致数据库崩溃的情况
+
+### 解决办法
+
+1. 设置不同的失效时间
+2. 采用缓存击穿的解决办法，加锁
+3. 永不失效，就是采用定时任务对快要失效的缓存进行更新缓存和失效时间
+

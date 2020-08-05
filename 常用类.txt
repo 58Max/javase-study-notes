@@ -1,0 +1,68 @@
+
+常用类
+
+=================
+
+字符串类String
+
+===================
+ 构造方式： 字面量方式 ，new的方式
+   new String(char []);
+   new String(c, offen, count);c: 数组， offen： 起始位置，count:从起始位置起读的个数
+   public boolean startWith(String s);判断字符串是否以字符串s开头
+   public boolean endWith(String s);判断字符串是否以字符串s结尾
+   public int compareTo(String s);按字典序与参数s指定的字符串比较大小  ,返回值为顺位比较差值，如果“abcd”与“abc”比较返回长度差，***严格区分大小写
+   public int compareToIgnoreCase(String s); 与compareTo相同，但不区分大小写
+   public boolean contains(String s);判断当前字符串对象是否含有参数指定的字符串s
+   public int indexOf(String s);从当前字符串的头开始检索字符串s,并返回首次出现s的位置
+   int indexOf(String s,int startpoint);从第startpoint个元素开始，判断s在字符串出现的位置
+   int lastindexOf(String s);获取字符串s在字符串最后一次出现的位置
+   public String substring(int startpoint);获得一个当前字符串的子串（从startpoint开始截取到最后并返回一个新的字符串）
+   String substring(int start,int end);获得一个字符的字串（从start开始截取到end（不包括end）并返回一个字符串）***[ , )
+   public String trim();得到一个去掉前后空格后的字符串对象
+   String [] split(String regex);以regex切割字符串，形成字符串数组
+   String replace(String old,String new);替换字符串；
+
+=================================
+
+Date & DateFormat
+
+获取本地时间（你的电脑的时间）时间是格林威治时间（国际标准时间）GTM
+public SimpleDateFormat(String s)s代表时间格式： ("yyyy-MM--dd HH:mm:ss")
+格式化规则： yyyy代表年份  MM代表月份  dd代表日 HH代表小时 mm代表分钟 ss代表秒
+
+=========================
+Calendar(日历)类
+
+Calendar 通过 Calender.getInstance();进行实例化；
+setTime(Date date);设置当前日期
+get(field);获取当前的年月日等，例如get(Calendar.YEAR   (MONTH,DAY_OF_MONTH) )
+set(field,date)；设置日期
+add(date,d);d为如何操作日期属性，加减值
+
+========================
+Math类
+
+abs     绝对值
+  acos,asin,atan,cos,sin,tan  三角函数
+  sqrt     平方根
+  pow(double a,doble b)     a的b次幂
+  max(double a,double b)
+  min(double a,double b)
+  random()      返回0.0到1.0的随机数
+  long round(double a)     double型数据a转换为long型（四舍五入）
+  toRadians(double angdeg)     角度—>弧度
+
+====================
+BigDecimal类
+
+一般的Float类和Double类可以用来做科学计算或工程计算，但在商业计算中，要求数字精度比较高，故用到java.math.BigDecimal类。BigDecimal类支持任何精度的定点数。
+  构造器
+public BigDecimal(double val)//不建议使用
+public BigDecimal(String val)
+  常用方法
+public BigDecimal add(BigDecimal augend)；加
+public BigDecimal subtract(BigDecimal  subtrahend)；减
+public BigDecimal multiply(BigDecimal  multiplicand)；乘
+public BigDecimal divide(BigDecimal  divisor, int scale, int roundingMode)；除参数一除数，参数二小数点以后保留几位，参数三 舍入方式
+BigDecimal对原有兑现没有影响，因为会生成一个新的BigDecimal对象

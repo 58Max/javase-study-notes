@@ -1,0 +1,32 @@
+EL表达式: expression language 表达式语言
+要简化jsp中java代码开发
+他不是一种开发语言，是jsp中获取数据的一种规范
+
+只能从4个作用域获得对象及获取顺序
+pageScope > requestScope > sessionScope > applicationScope
+${变量名} 原理：pageContext.findAttribute("变量名");
+指定域获取
+${域范围.变量}原理：pageContext.findAttribute("String name.int Scope");
+点(.)运算符 ${对象.属性}去获取数据
+
+EL对于获取null这样的数据表现为空字符串
+
+（[]）具有（.）的功能
+['']或者[""]
+
+算术表达式${+(-*/)}
+比较式 ${>(< =)}
+逻辑表达式${&&}
+判空表达式${empty name}
+三元算术式${true?a : b}
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,42 @@
+```java
+//@SpringBootApplication标注这个类是一个SpringBoot的应用
+@SpringBootApplication
+public class DemoApplication {
+
+    public static void main(String[] args) {
+        //将SpringBoot启动
+        SpringApplication.run(DemoApplication.class, args);
+    }
+
+}
+```
+
+注解
+
+```java
+@SpringBootConfiguration:SpringBoot的配置
+@Configuration： SpringBoot的配置类
+@Component：Spring的一个组件
+
+@EnableAutoConfiguration ： 自动配置
+@AutoConfigurationPackage：自动配置包
+@Import({AutoConfigurationImportSelector.class})：自动配置导入选择
+ //获取所有的配置
+ List<String> configurations = this.getCandidateConfigurations(annotationMetadata, attributes);
+```
+
+//获取选取的配置
+
+```java
+protected List<String> getCandidateConfigurations(AnnotationMetadata metadata, AnnotationAttributes attributes) {
+    List<String> configurations = SpringFactoriesLoader.loadFactoryNames(this.getSpringFactoriesLoaderFactoryClass(), this.getBeanClassLoader());
+    Assert.notEmpty(configurations, "No auto configuration classes found in META-INF/spring.factories. If you are using a custom packaging, make sure that file is correct.");
+    return configurations;
+}
+```
+
+//springboot配置的核心文件
+
+```
+META-INF/spring.factories
+```

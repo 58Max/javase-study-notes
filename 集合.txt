@@ -1,0 +1,91 @@
+集合分为 Set, List,Map
+。集合中只能存放对象，会把非对象类型进行自动转换为相应的对象类型
+。可以利用泛型控制容器中的数据类型
+1.Set集合 特点：无序，不可重复集合 
+  （1）HashSet HashSet类-->set接口-->Collection接口 具有很好的查找和存取功能 ，利用hashcode值来确定存储位置 
+            A.HashSet的特点： 
+                a.不能保证元素的排列顺序
+                b.不可重复（即两个元素的hashCode（）不相等，当添加重复元素时不显示）
+                c.线程不安全
+                d.集合元素可以是Null
+            B .HashSet的用法
+                a.add(Object obj)方法；向集合中添加对象元素，如果没有泛型控制，可以添加任何类型
+                b.remove(Object obj)方法； 移除集合中的某个元素
+                c.clear()方法；清空集合中的所有元素；
+                d.contains（Object obj）方法； 返回的是布尔型，判断集合中是否存在某元素
+                e.使用迭代器来遍历集合
+                         Iterator it = set.iterator();
+                                 while(it.hasNext()){
+                                        System.out.println(it.next());
+                                    }
+               f.for each迭代集合
+                    for(Object obj : set){//把set中的每一个元素取出来赋予obj直到循环set的所有值
+                                         System.out.println(obj);
+                                 }
+               g.size()方法； 返回值为int，获取集合的元素个数
+         （2）TreeSet 特点：可以确保集合元素处于排序状态，支持两种排序方法（(默认)自然排序和定制排序）TreeSet类-->NavigableSet接口-->SortedSet接口-->set接口-->Collection接口
+                     A.TreeSet特点
+                           a.支持两种排序方法（(默认)自然排序和定制排序）
+                           b.默认自然排序(按照英文字典进行排序)
+                     B.TreeSet方法
+                           a. 同HashSet集合
+                           b.自然排序调用compareTo(Object obj)方法 大于返回1 小于返回-1 等于返回 0，必须使用相同类型的对象进行比较
+                           c.自定义对象可以实现Comparator接口重写compare()方法实现升序排序或者降序排序 返回同上但是在实例化对象时TreeSet（）中要传入 new 自定义对象；
+                           
+2.List集合 特点： 有序，可重复的集合
+                    （1）ArrayList集合 ArrayList类-->List接口-->Collection接口 元素有序，且可重复的集合，元素的每个元素都有对应的顺序索引（即按照添加顺序设置元素的索引）
+                                 A.ArrayList 特点
+                                            a.元素有序（按照元素添加到集合的顺序设置元素的索引）
+                                            b.元素可重复
+                                 B.ArrayList用法
+                                       a. 添加，add()； 长度 size(),返回值为int;
+                                       b. get(index); index(索引) 根据索引获取元素
+                                       c. add(index,Object) 在指定索引下标位置下插入指定对象（元素）；
+                                       d. addAll(index,ArrayList)，在指定索引下标位置插入指定的集合；
+                                       e. indexOf(Object)，返回值为int，获取指定元素在集合中的第一次出现的索引下标
+                                        f. lastIndexOf(Object)，返回值为int， 获取指定元素在集合中的第后一次出现的索引下标   
+                                        g. remove(index),根据指定的索引下标移除元素 
+                                        h. set(index,Object),根据指定的索引下标修改元素
+                                         i. (index,index);根据指定的索引下标截取元素形成一个新的集合 原则是前闭后开[ ,）;
+                                         j.                                      
+3.Map集合 特点：具有映射关系的集合（key，value）键（key)唯一，但值（value）不唯一，通过key可以找到唯一对象的value
+                     HashMap: HaspMap类--->Map接口-->Collection接口
+                             A.HashMap方法：
+                                      a.put(key,value); 添加
+                                      b.get(key)，返回的是value值 根据key取值
+                                      c.remove(key), 根据key移除键值对
+                                      d.size(),返回值为int，集合长度
+                                      e.contionsKey();返回值为布尔型，判断当前集合是否存在key
+                                      f.contionsValue();返回值为布尔型，判断当前集合是否存在value；
+                                      g.clear(),清空集合
+                                      e.遍历集合
+                                               。keySet（）返回值为一个集合，获取key集合
+                                                。。values() 返回值为一个集合，获取value集合
+                                            /可以通过keySet（）集合遍历集合
+                                                      Set<T> keys = keyset();
+                                                       for(T key : keys){
+                                                                     System.out.println("key: "+key+",value: "+get(key));
+                                                                     }
+                                           //可以通过entrySet()
+                                                   Set<Entry<T,T>> entrys = entrySet();
+                                                      for(Entry<T,T> entry : entrys){
+                                                                  System.out.println("key: "+entry.getKey()+",value:"+entry.values());
+                                                                           }
+                    (2)TreeMap
+
+                                  A.TreeMap特点：根据key值进行排序，默认自然排序,自定义排序同上自定义排序。
+================================================
+操作集合的工具类 Collectiions
+1.排序操作
+   a. reverse(List),反转List中的元素顺序；
+   b. shuffle(List),对List集合元素进行随机排序；
+   c.sort(List),根据元素的自然排序对指定List集合元素按升序排序；
+   d. sort(List,Comparator),根据指定的Comparator产生的顺序对List集合元素进行排序；
+   e. swap(List, int ,int),将指定的list集合中的i处的元素和j处的元素进行交换；
+   f. max(List),返回集合中的最大值；
+   g. min(List)，返回集合中的最小值；
+   h. max(List,Comparator)，按照指定排序返回指定集合中的最大值；
+   i. min(List,Comparator) ,按照指定排序返回指定集合中的最小值；
+   j. frequency(List,Object),返回指定集合中指定元素的出现次数；
+   k. replaceAll(List,Object oldVal, Object newVal),使用新值替换指定集合中的所有旧值；                            
+

@@ -1,0 +1,39 @@
+Mybatis 是一个优秀的数据持久层框架，他对JDBC的操作数据库的过程进行封装
+
+数据持久层
+
+三层架构 表现层 业务逻辑层 数据访问层
+
+三层架构和MVC不是一回事
+
+MVC注重 表现层的代码耦合问题
+
+三层架构注重 整个项目的代码耦合问题
+
+myBatis的映射器 常用的三种方式
+
+1.纯xml映射器 利用sqlsession完成增删改查
+
+
+
+
+
+
+
+！！！！！ 难点：Mapper文件和接口的参数问题
+
+1. 传递单个参数不使用@Param注解
+
+当传递一个参数时，Mapper文件不需要使用parameterType这个属性，接口也不需要使用注解，mybatis会自动识别并匹配javabean
+
+2.传递单个参数使用@Param注解
+
+当使用javaBean作为对象时 不许指定参数类型parameterType="" #{}中不能直接填入javaBean的属性，需要#{javaBean.属性}这样的格式 如果不是javaBean#{xxx}的属性必须要与注解@Param("xxx")一致
+
+3.传递多个参数，使用@Param注解
+
+@Param中定义的变量名必须与mapper中保持一致
+
+4.传递多个参数不使用@Param注解
+
+将不同的javaBean封装成map集合

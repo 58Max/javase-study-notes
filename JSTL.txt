@@ -1,0 +1,92 @@
+JSTL (javaServicepages standard tag library) jsp标准标签库
+
+JSTL标签分类
+JSTL的核心标签
+格式化标签
+SQL标签
+XML标签
+JSTL函数
+
+JSTL核心标签
+<%@ taglib prefix = "c" uri="http://java.sun.com/jsp/jstl/core"%>
+
+<c:cout></c:cout>escapeXml="true" 过滤掉xml标签 不配置默认false
+<c:out value="" default="默认值" escapeXml="true"></c:cout>输出标签value中值
+
+
+<c:set></c:set> scope默认page作用域
+<c:set var="变量名" value="变量值" scope="作用域">设置变量
+
+<c:remove></c:remove>
+<c:remove var="变量名" scope="作用域"></c:remove> 移除变量
+
+<c:if></c:if>字符串判断 == boolean判断 == 数字判断 >,<,==
+<c:if  test="逻辑表达式EL"></c:if>
+
+<c:choose>
+<c:when></c:when>
+<c:otherwise></c:otherwise>
+</c:choose> c:when,c:otherwise 的父标签
+<c:choose>当使用when和otherwise时，必须嵌套在choose中
+<c:when test="逻辑表达式EL"></c:when>if(else if)
+<c:otherwise test="逻辑表达式EL"></c:otherwise>else
+</c:choose>
+
+<c:forEach></c:forEach>迭代
+ varStatus="vs" 
+${vs.index}索引下标 
+${vs.count}索引所在行数 
+${vs.first}判断是否是第一个元素 
+${vs.last}判断是否是最后一个元素 
+${vs/begin}起始索引   与forEach中begin一致
+${vs.end}终止索引      与forEach中end一致
+${vs.step}索引步长     与forEach中step一致 
+<c:forEach item="需要遍历的集合" var="临时变量名称" begin="遍历开始的位置" end="遍历结束的位置" step="步长：每隔step-1个元素取一个" varStatus="保存当前遍历元素索引"></c:forEach>
+
+<c:forTokens></c:forTokens>
+<c:forTokens item="需要遍历的数据" delims="分隔符" var="临时变量名称" begin="遍历开始的位置" end="遍历结束的位置" step="步长：每隔step-1个元素取一个" varStatus="保存当前遍历元素索引"></c:forTokens>
+
+JSTL的格式化标签
+<%@taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
+
+<fmt:formatNumber></fmt:formatNumber> 数字格式化 作用域 page request session application
+<fmt:formatNumber var="变量名" value="值" scope="作用域" maxIntegerDigits="整数位的最大整数位" minIntegerDigits="最小整数位" minFractionDigits="最小小数位" maxFractionDigits="最大小数位" groupingUse="true/false 每隔3位数位要不要用","分隔一下，默认true" type="NUMBER/PERCENTO（百分比）/CURRENCY（货币，货币符号与地区有关可以设置） 默认NUMBER" currency="" pattern="00000.00/###.##" 自定义格式化 #号会把补位的0去掉></formatNumber>
+
+<fmt:parseNumber></fmt:parseNumber>解析数字字符串
+<fmt:parseNumber var="" value=""inteagerOnly="true"只解析整数部分 scope="" type="" parseLocale="地区码"></fmt:parseNumber>
+
+<ftm:formatDate></ftm:formatDate>日期格式化标签
+<ftm:formatDate var="" value="<%new Date()%>" dateStyle="DEFAULT(默认)/FULL/SHORT/LONG"设置时间的年月日部分格式  timeStyle="DEFAULT(默认)/FULL/SHORT/LONG" 设置小时分秒部分的格式 scope="" type="date(默认)/time/both"></ftm:formatDate>
+自定义格式化部分pattern="yyyy年MM月dd日 HH-mm-ss S E"S是毫秒 E是星期几
+D 一年中的第几天  w一年中的第几周  W一个月中的第几周  a只是当前时间是上午还是下午 k当前的小时24小时制  K当前的小时12小时制 F一年中的第几个周几 
+
+<fmt:parseDate></fmt:parseDate>解析时间字符串称格林威治时间（国际标准时间）
+<fmt:parseDate var="" value="" type="" dateStyle="" timeStyle="" ></fmt:parseDate>
+自定义 pattern=""
+
+
+JSTL函数标签
+<%@taglib prefix="fn" uri="http://java.sun/com/jsp/jstl/functions"%>
+
+${fn:contains(输入字符串,判断字符串)}判断输入的字符串包含指定的字符串
+${fn:containsIgnoreCase(输入字符串,判断字符串)}判断输入的字符串包含指定的字符,大小写不敏感
+${fn:endwith(输入字符串,判断字符串)}判断输入的字符串是否以指定字符串结尾
+
+${fn:escapeXml(字符串)}；不忽略xml标签，把xml标签当普通字符串输出，直接用EL表达式输出会忽略到xml标签
+${fn:indexOf(输入字符串,判断字符串)};输出判断字符串在输入字符串的位置
+${fn:join(数组，",")};将数组输出以分割符输出
+${fn:length(字符串)}；输出字符串的长度
+${fn:replace(字符串，旧字符串，新字符串)}；将字符串中的旧字符串替换为新字符串
+${fn:split(字符串，"")};将字符串以指定分割符分割然后形成字符串数组并返回
+${fn:startsWith(字符串，“指定前缀”)}；测试输入字符串是否以指定前缀开始
+${fn:substring(str,起始位置，结束位置)};返回字符串的子集
+${fn: substringAfter(字符串，“”)};返回字符串在指定字串之后的子集
+${fn:substringBefore(字符串,"")}返回字符串在指定字串之前的子集
+${fn:toLowerCase()}将字符串中的字符转化为小写
+${fn:toUpperCase()}将字符串中的字符转化为大写
+${fn:trim()};移除首尾的空白符
+
+
+
+
+

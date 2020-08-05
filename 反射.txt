@@ -1,0 +1,94 @@
+   java反射机制提供的功能
+   在运行时判断任意一个对象所属的类
+   在运行时构造任意一个类的对象
+   在运行时判断任意一个类所具有的成员变量和方法
+   生成动态代理
+=====================================================
+                           java动态代理
+        java动态代理
+        动态代理类需要实现接口InvocationHandler
+        Proxy是所有动态代理类的父类
+       能够动态代理的类必须要实现接口
+       在实现动态代理时需要Proxy.newProxyInstance(ClassLoader,interface,h)
+          ClassLoader(代理对象的加载器)  interface(被代理对象实现的接口)   h（代理对象）
+         返回值为成功被代理后的对象类型为Object需要根据情况强制转换
+
+=====================================================
+            实例化Class类对象（四种方法）
+    前提：若已知具体的类，通过类的class属性获取，该方法最为安全可靠 ： 实例 Class clazz = String.class;
+   前提： 已知某个类的实例，调用该实例的getClass（）方法获取class对象。实例： Class  clazz = p.class; p 为一个类的实例化对象
+    前提：一直一个类的全类名，且该类在类的路径下，可通过Class类的静态方法forName()获取，可能抛出 ClassNotFoundException() 实例 ： Class clazz = Class.forName(String classname);方法中参数是你要获取的class实例的类的全路径（包名.类名）获取Class实例的常用方法
+    其他方式： Class clazz = this.getClass().getClassLoader().loadClass("类的全类名");
+
+=====================================================
+
+   对象.getClass() 返回值为 一个Class类对象
+    例 Person p = new Person();
+         Class clazz = p.getClass();clazz对象中包含对象p所属的Person类的所有信息
+         p.getClass().getName();返回值为String 获得类的名称；
+          通过Class类可以获得一个类的所有信息
+  Class 类的常用方法
+    forName（）;根据类的全类名获取Class对象
+    newInstance();创建目标类对象  
+    getName（）;获取名称；
+    getSuperclass();获取所有的父类的Class对象
+    getModifiers();获取修饰符 返回值为int，1：public ，2：private
+    getParameterTypes();获取参数类型，返回值是Class[]数组
+    getClassLoader();获取类的加载器
+    getInterface()；获取所有实现的接口，返回的是一个Class[]数组
+    getConstructors();获取public构造器 返回的是一个 constructors[]数组
+    getDeclaredConstructors();获取所有类型 的构造器 返回的是一个 constructors[]数组
+    getFields();获取类的public成员属性（包括父类），返回的是一个Field[]数组
+    getDeclaredFields;获取类的所有成员属性（不包括父类的属性），返回的也是一个Field[]数组
+    getMethod(String name(方法名称),Class...Paramtypes(参数类型列表，注意一定要类型加.class结尾)) ；获取修饰符为public的方法，返回值为Method[]数组
+    getDeclaredMethod(String name(方法名称),Class...Paramtypes(参数类型列表，注意一定要类型加.class结尾)) ；获取所有的方法,返回值为Method[]数组
+
+  ===========================================  
+    通过反射机制实例化对象
+    Class对象.newInstance();利用反射的构造方法实例化对象，相当于调用一个类的无参公共的构造方法。
+    Class对象.getConstructor(参数类型.class...).newInstance(参数类型的数据...);指定获取有参公有构造器然后实例化对象；
+    Class对象.getDeclaredConstructor(参数类型.class...).newInstance(参数类型的数据...);可以指定获取有参构造器（包括私有但需要破除封装）然后实例化对象；如果调用私有方法需要破       除封装：Class对象.getDeclaredConstructor(参数类型.class...).setAccessible(true)
+
+================================================
+    通过反射机制获取方法
+    Method [] method = 对象.getMethod() ；获取修饰符为public的方法，返回值为Method[]数组
+    Method [] method = 对象.getDeclaredMethod() ；获取所有的方法,返回值为Method[]数组
+    当获取私有方法时，需要破除封装：method.setAccessible(true)
+    getName（）;获取名称；
+    getReturnType();获取方法的返回值类型
+    getModifiers();获取修饰符
+    getParameterTypes();获取参数类型，返回值是Class[]数组
+
+=================================================
+    通过反射机制获取所有的属性
+     Filed [] fileds = 对象.getFields();获取类的public成员属性（包括父类），返回的是一个Field[]数组
+     Filed [] fileds = 对象.getDeclaredFields;获取本类的所有成员属性（不包括父类的属性），返回的也是一个Field[]数组
+     当获取私有属性时，需要破除封装： fileds.setAccessible(true)
+     getModifiers();获取属性修饰符
+     getType();获取属性类型
+     getName();获取属性名称
+
+===========================================
+  通过反射机制获取包
+  getPackage();获取包，返回值为 Package
+  
+
+=============================
+   通过反射机制指定调用方法
+     Method method = 对象.getMethod(String name(方法名称),Class...Paramtypes(参数类型列表，注意一定要类型.class))；获取公共方法，返回值为Method
+     Method method = 对象.getDeclaredMethod(String name(方法名称),Class...Paramtypes(参数类型列表，注意一定要类型.class)) ；获取所有的方法,返回值为Method
+    当获取私有方法时，需要破除封装：method.setAccessible(true)
+     method.invoke(obj,args);obj是实例化对象，args是当前方法的实际参数列表
+     当调用有返回值的方法是是要与返回值同类型的接受需要 强制类型转换
+     
+================================ 
+              通过反射机制设置属性 
+     Field f = Class对象.getField(String name)；（包括父类）name为要访问的属性名
+     Field f = Class对象.getDeclaredFields;获取类的所有成员属性，（不包括父类）
+     当想要设置私有属性时需要 f.setAccessible(true)解除封装
+     f.set(obj,value);obj为实例化对象，value为设置属性的值     
+     属性类型 ff=f.get(obj);获取实例化对象的属性,返回（f对应属性）的值
+     Field f = Class对象.getDeclaredFields;获取类的所有成员属性，（不包括父类）
+     f.setAccessible(true)解除封装
+     
+

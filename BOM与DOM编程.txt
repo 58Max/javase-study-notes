@@ -1,0 +1,131 @@
+BOM
+
+浏览器对象模型
+
+window对象 JavaScript中的顶层对象，代表一个浏览器窗口或框架
+
+alert();显示警告框
+
+confire();选择确定框 返回值为Boolean类型
+点确定的时候返回true点取消的时候返回false
+
+prompt(text,value);输入框 返回值为输入框中的输入值，text文本文字，vlaue为输入框中的默认值
+
+open(url);打开一个新的窗口 url可以是网页地址，也可以是html文件的路径
+
+setTimeout(callback,delay);callback是回调函数，delay为延迟时间 在延迟delay毫秒之后出发 callback方法
+
+setInterval(callback,delay);在触发setInterval方法后每间隔delay毫秒后执行callback方法
+
+location对象
+包含当前URL的信息
+
+href属性，设置或获取整个URL为字符串
+可以通过给href设置值，完成网页的跳转，这种方式叫做重定向
+reload  刷新页面
+
+screen对象
+包含了客户机显示屏幕的信息
+
+availHeigth；获取屏幕的系统工作区高度，任务栏除外
+availWidth；获取屏幕的系统工作区宽度，任务栏除外
+heigh；获取屏幕的垂直分辨率
+width；获取屏幕的水平分辨率
+
+document对象
+该对象代表整个文档页面（网页中的所有HTML标签部分）主要用于DOM编程
+
+事件
+
+鼠标点击是相关
+onclick 在用户用鼠标左键单击对象时触发
+ondbclick 当用户用鼠标左键双击对象时触发
+onmousedown 当用户鼠标按下对象时触发
+onmouseup 当用户在鼠标在对象之上释放按钮时触发
+onmouseout 当用户鼠标箭头移出对象范围时触发
+onmousemove 当用户鼠标箭头在对象上划来划去时触发
+
+焦点相关事件
+onblur 当对象失去焦点时触发
+onfocus 当对象得到焦点时触发
+
+按钮相关事件
+onkeydown 当用户按下键盘时触发
+onkeyup 当用户按下键盘释放时触发
+onpress 当用户按下字面键（英文字母，数字，字符）时触发
+onchange 当对象或选中区的内容发生改变时触发 下拉列表
+onload 当浏览器完成对象的加载后立即触发，body上，一般用来初始化网页，不是很常用
+onsubmit 当表单将被提交时触发
+
+=====================================
+DOM
+浏览器在解析HTML页面标记的时候，其实不是按照一行一行读取解析的，而是将HTML页面中的每一个标记按照顺序在内存中组件一颗DOM树，组建好之后，按照树的结构将页面显示在浏览器窗口
+
+获取节点对象
+getElementById();通过id属性获取html元素
+getElementsByTagName();根据标签名获取html元素
+getElementsByName();通过name属 
+
+获取与设置节点属性
+getAttribute();获取节点的属性
+getAttribute();设置节点的属性
+
+DOM节点与节点对象的信息
+
+一组HTML标签就是一个节点
+标签中文本是一个节点
+注释也是一个节点
+节点可以有子节点、父节点、兄弟节点
+
+每个节点含有 nodeType、 nodeName 、nodeValue 三个属性
+
+元素 1 标签元素
+文本 3 标签元素中的文本
+注释 8 表示为注释
+
+元素节点的 nodeName是标签名称
+文本节点的 nodeName 永远是#text
+
+对于文本节点 ,nodeValue 属性是所包含的文本
+对于注释节点,nodeValue 属性是注释内容
+nodeValue属性对元素节点是不可用的
+
+新增节点
+创建一个节点,给节点设置属性等
+再利用
+appendChild();在最后增加一个子节点
+insertBefore();插入到一个节点前面
+insertAfter();插入到一个节点后面
+
+删除、替换、复制
+
+删除
+首先得到节点，在通过此节点得到此节点的父节点，在利用 "父节点.removeChild(target)" 删除该节点
+
+替换
+首先创建一个节点，然后得到需要替换的节点，在得到需要替换的父节点，再利用"父节点.replaceChild(newNode,oldNode)"替换该节点
+
+复制节点
+cloneNode(true/false);ture的时候会复制此节点及其子节点，false则只会复制该节点
+
+通过节点关系查找节点
+parentNode;得到父节点
+childNode;得到子节点
+firstNode;得到第一个子节点
+lastNode;得到最后一个子节点
+nextSibling;得到同级的下一个节点
+previousSibling;得到同级的前一个节点
+
+****注意****
+例： <div id="d_1">
+               <span id="s_1">1111</span>
+               <span id="s_2">22222</span>            
+        </div>
+有5个节点：
+        1.div的本身文本节点
+        2.s_1的标签
+        3.s_1的文本节点
+        2.s_2的标签
+        3.s_2的文本节点
+
+ 

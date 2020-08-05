@@ -1,0 +1,19 @@
+java.io.*;这是java中对文件操作的包
+   其中
+       字节流操作                                  字节流 ----------->缓冲字节流
+         输入流 ：InputStream（抽象类）-->FileInputStream---->BufferedInputStream
+         输出流： OutputStream(抽象类)-->FileOutoutStream--->BufferedOutputStream
+       字符流操作                              字符流--------->缓冲字符流
+           输入流： Reader(抽象类)--->FileReader--->BufferedReader
+            输出流： Writer(抽象类)--->FileWriter--->BufferedWriter
+          转换流操作
+              InputStreamReader   OutputStreamWriter
+           对象流操作
+               ObjectInputStream     ObjectOutputStream
+                  注意：序列化和反序列化的对象必须是同一个类的对象
+            随机存取流
+                RandomAccessFile(掌握读写)
+                           r  打开读取文件
+                           rw  打开读并且写文件
+                           rwd  打开读写并且同步文件的更新
+                           rws    打开读写并且同步文件内容和元数据的更新

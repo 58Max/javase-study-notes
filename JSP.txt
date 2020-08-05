@@ -1,0 +1,116 @@
+JSP(Java Server Page)Java服务页面
+为什么要使用JSP？
+HTML代码在Servlet中写起来非常麻烦，用的都是字符串，易出错不易排查
+用HTML语言写页面，用java写业务逻辑
+用java语言开发动态资源
+
+JSP的运行过程
+单实例多线程（只生成一个对象）
+1）第一次访问JSP时，Tomcat服务器会把JSP翻译成java源文件在work目录下
+2）Tomcat服务器把java源文件编译成class字节码文件
+3）构造类对象
+4）调用类的方法_jspService方法
+再次访问该jsp文件时直接调用类对象方法
+***注意 ：当jsp文件内容发生变化时，将会重新翻译和编译jsp文件。
+
+jsp中的html代码和java代码是如何被执行的？
+html被转成了字符串使用out.write()输出
+java代码被放到_jspService()方法中执行
+
+jsp与servlet的关系
+jsp翻译成的java类最终继承了sevlet
+jsp时servlet的子类
+jsp是一个特殊的servlet
+servlet编写网页，是写HTML的字符串，通过write方法输出到浏览器，其中写java代码在doPost()或者doGet()方法中正常写
+jsp编写网页，写html就像写正常的html一样写，在写java代码时是在<%%>中去编写java代码，使用时翻译成java代码，html翻译成字符串通过write()方法输出，java代码和html字符串嵌套在_jspService()方法中，通过write输出到服务器中
+jsp比纯粹的servlet写网页简单，因为可以像一个正常的html文件一样写
+
+jsp表达式 语法<%=变量或者表达式%> 作用：向浏览器输出变量的值或者表达式的计算结果 
+*****注意：原理 ouot.print(name)方法向浏览器输出，结尾不能有分号
+
+jsp脚本 语法<%java代码%> 作用：嵌套java代码逻辑 
+***注意：其原理是直接把java代码逻辑在翻译成java文件后加入_jspService()方法中，jsp脚本中可以穿插html代码混合使用
+
+jsp注释 语法<%--注释--%> 作用：注释
+***注意：不会翻译到java源文件中
+
+jsp声明语法<%!声明%> 作用：用于声明jsp的变量和方法
+***注意：声明的是成员变量和方法 变量和方法不能在脚本中声明和定义不能与翻译后的java源文件原有的方法重复
+
+jsp的三个指令
+page 指令
+include 指令
+taglib 指令
+
+page指令
+语法：<%@指令名称 属性1="" 属性2="" .....%>
+或者<%@指令名称 属性1="" %>
+<%@指令名称 属性2=""%>
+page用于定义jsp页面的各种属性
+session 是否生成session对象 默认是true
+errorpage="/路径"绝对路径/相对路径（在同一目录下）如果有错误则跳转到指定资源
+isErrorPage:是否创建throwable对象。默认是false 有助于浏览器的调试
+定义当前页面是否是错误页面或者是否是发生错误之后跳转的页面。false时即使是错误页面给浏览器返回的状态码是正常的200，true给浏览器返回的状态码是500的错误码
+pageEncodeing 告诉jsp引擎在翻译jsp文件时用什么样的编码翻译
+contentType 上下文格式 参考pageEncodeing
+isElIgnored 是否支持EL表达式 默认false
+
+include指令用于导入其他页面文件
+include的具体用途：用来包含一些常用的公共页面，比如网页的头部和尾部
+还可以用来引入js和css的公共文件
+语法:<%@include file=""%>
+***被导入的页面不包含全局标签 包含与被包含 先将内容合并在一起 再进行翻译 （先合并再包含）
+成为静态包含
+
+taglib指令
+作用： 在jsp页面中导入JSTL标签库。替换jsp在jsp中的java代码片段
+<%@taglib url = "http://java.sun.com/jsp/jstl/core" prefix="c"%>
+
+
+jsp中有9个内置对象
+request response session config  application exception out page pageContext
+可以通过<%%><%=%>使用
+application
+
+
+四大域对象
+PageContext:pageContext 存放的数据在当前页面有效，开发时使用较少
+
+ServletRequest:request存放的数据在一次请求内有效。使用非常多
+
+HttpSession:session存放的数据在一次会话中有效。使用的比较多。
+
+ServletContext:application存放的数据在整个应用范围内都有效。因为范围范围太大，应尽量少用
+
+Jsp的最佳实践
+项目中可能会涉及的工作：
+1）接收参数
+2）处理业务逻辑
+3）跳转其他数据
+4）显示数据
+Servlet：擅长写java代码
+Jsp： 擅长显示数据
+
+最佳实践：利用servlet来处理java相关的逻辑事务，把需要显示的数据发送给jsp，然后再jsp中显示数据
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

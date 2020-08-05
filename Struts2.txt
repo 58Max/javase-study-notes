@@ -1,0 +1,127 @@
+OGNL表达式的概述与值的存取（Struts2自己的参数传递体系）开源项目
+
+1.支持方法调用
+
+2.类的静态方法调用和值访问
+
+3支持赋值操作和表达式串联
+
+4.访问OGNL上下文和ActionContext
+
+5.操作集合对象
+
+OGNLContext本质是一个Map集合
+
+通过k.v的形式存值
+
+OgnlContext ognl = new OgnlContext();
+
+ognl.put(k,v) 放在ognl的普通位置
+
+ognl.setRoot(v)放在根路径下不需要k值
+
+Object obj = Ognl.parseExpressiong("#对象名.属性或者方法名")  定义表达式 取值 返回值为对象
+
+Ognl.getValue(obj(定义表达式对象),ognl(OgnlContext对象),ognl.getRoot()（OgnlContex的Root对象）)；需要强转对象根据返回值的不同类 执行表达式
+
+在获取根路径下的对象时 定义表达式 不需要写#和k值 直接写属性名或者方法名就可以了
+
+
+
+表达式可以直接调用静态方法属性 使用@符号直接调用具体写法 @包名.类名@属性名或者方法名
+
+context.paresExpression("@包名.类名@属性名或方法名")
+
+
+
+操作集合 类似对象存取值
+
+
+
+值栈（ValueStack） 是Struts2的一个接口 传递值的一种方法 可以存值和取值 为了替代servlet的域对象
+
+ 值栈随着Action的创建而创建并贯穿Action的整个生命周期 每个Action的对象都会有一个 值栈对象
+
+通过ActionContext.getValueStack()方法获取值栈对象
+
+每次访问Action都是创建一个新的action对象
+
+每个action对象都有自己的值栈对象  有且仅有一个值栈对象
+
+意思就是访问多次一个action会有不同的值栈对象
+
+值栈的内部结构
+
+值栈对象ValueStack有两个属性
+
+CompoundRoot Root 值栈
+
+Map<Sting,Object> context      OgnlContext 上下文
+
+ValueStack stack = ActionContext.getValueStack();
+
+stack.getContext 获取context对象 也就是OgnlContext上下文  存放的是域对象的信息
+
+CompoundRoot 存储了action类的属性值和实例对象 继承了 ArryList的 拥有 栈先进后出的特点 
+
+值栈的存值与取值
+
+放入数据 
+
+1.获取值栈对象并调用set方法
+
+2.获取值栈对象并调用push方法
+
+3.常用方法 给action设置成员变量，成员变量要有getter方法
+
+取出数据
+
+1.调用值栈set方法的存值  key.属性
+
+2.调用值栈push方法的存值  属性
+
+3.获取放在action属性中的存值  对象名.属性
+
+
+
+Struts2标签库
+
+使用标签 需要导入标签库
+
+1.控制标签
+
+<s:if>,<s:else>，<s:elseif> 
+
+<s:iterator>  iterator标签的属性必填 value=“” var=“”每次遍历变量值赋予的名称 
+
+选填属性 begin=“” 开始遍历的位置  end=“”遍历结束的位置 step=“”每几个元素迭代一次 status=“”
+
+status的属性 status=“st” index索引值 count 返回当前已遍历元素的个数 last 返回当前元素是否是最后一个元素 first 返回当前元素是否是第一个元素 even 返回当前元素是否是偶数 odd 返回当前元素是否是奇数
+
+当使用status=“st”时<s:property value=“#st.index(count,first....)”>
+
+Struts2的s标签和JSP的c标签的区别是表达式是OGNL表达式也能够得到对象的方法属性
+
+2.数据标签
+
+<s:property>输出值
+
+属性 value=“”用来输出指定的值 escapeXxx=“” true 就是把html标签当做普通字符串输出 默认值为false
+
+default=“” 如果输出值为null那么就输出默认值
+
+<s:a> 相当于html的a标签
+
+<s:debug>用于程序调试的阶段，会输出很多信息
+
+UI标签
+
+<s:form action="" post=""> form表单标签的action属性不需要写 action后缀
+
+<s:radio list=""> radio list属性可以使用 值栈中的list集合
+
+<s:checkbox list="">checkbox标签的list集合可以从后端的值栈中的list集合传过来
+
+<s:select list=""> select 下拉列表 可以从后端的值栈中的map集合传过来
+
+虽然Struts2有UI标签但是一般不会使用 因为涉及到项目改造问题 当需要其他框架来替换Struts2框架时页面部分的不易改造   

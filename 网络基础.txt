@@ -1,0 +1,94 @@
+网络编程的目的就是指直接或间接的通过网络协议与其他计算机进行通信一般
+ 
+网络编程的两个主要问题： 1.如何准确的定位一个或者两个主机 2.找到主机后如何可靠高效的进行数据传输
+
+两套参考模型： 1.OSI参考模型（过于理想化）  2.TCP/IP参考模型（TCP/IP协议）国际标准  3.UDP协议
+
+分层结构 OSI模型：应用程 汇聚层 会话层 传输层 网络层 链路层 物理层
+               TCP/IP:应用层 传输层 IP层 网络接口层
+运输层有两个非常重要的协议： 传输控制协议 TCP（面向连接的运输层协议）即在使用TCP协议的时侯必须建立TCP连接，在传输完毕后释放连接 。字节流  使用的两个进程：1.服务器进程 2.客户进程 TCP提供可靠的服务，传输的数据无差错，不丢失，不重复且按序到达
+                                              用户数据报协议UDP（面向无连接的运输层协议）即不必建立连接。减少了开销和发送数据之前的时延。报文 IP电话和实时会议优势（不会出现阻塞，可能会丢包）
+
+=============================
+InetAddress类
+
+域名：www.xxxxxx.com
+IP地址：202.xxx.xx.xxx
+
+getByName(String s);将一个域名或IP地址传递给该方法的参数，获得一个InetAddress对象，该对象含有主机地址的域名和IP地址
+getHostName()；获取对象的域名
+getHostAddress();获取对象的IP地址
+
+=====================
+TCP程序设计
+
+客户端：当客户端向服务端发起请求时，需要知道服务端的位置（IP+端口号（端口号被规定为16位的数字1024~65535））
+
+服务端
+
+
+Socket（套接字）的7中基本操作：连接到远程主机 绑定到端口 接受从远程机器来的连接请求 监听到达的数据 发送数据 接收数据 关闭连接  服务端与客户端相混合  
+
+Server                                                             
+ServerSocket(int port);port为端口                                          
+Socket accept();监听连接服务端的客户端                              
+OutputStream                             
+Socket.getOutputStream(); 输出流                             
+InputStream                              
+Socker.getInputStream()；获取输入流                             
+Socket.close();                              
+
+========================================
+Socket和SocketServer的常用方法
+
+Socket类的常用方法
+InetAddress getLocalAddress();返回值为IndetAdress对象,为对方Socket中的IP的InetAddress对象
+int getLocalPort();返回为本地Socket中的端口号
+InetAddress getInetAddress();返回对方Socket中的端口号；
+int getPort; 返回对方的socket中的端口号
+void close() throws IOException ；关闭Socket，释放资源
+InputStream getInputStream() throws IOException  ；获取与socket相关联的字节输入流，用于从Socket中读数据
+OutPutStream getOutputStream() throws IOException； 获取与socket相关联的字节输出流，用于向Socket中写数据
+
+SocketServer类的常用方法
+
+Socket accept() throws IOException;等待客户端的连接请求，返回与该客户端进行通信用的Socket对象
+void setSoTimeout(int timeout) throws SocketException;设置accept()方法，等待连接的时间为timeout秒，若时间已到，还没有客户端连接，则抛出InterruptedIOException异常，accept()方法不在阻塞,该倾听Socket可继续使用,若timeout值为0，则表示accept()永远等带。该方法必须在倾听Socket创建后，在accept()之前调用才有效。
+void close()throws IOException;关闭监听Socket
+InetAddress getInetAddress();返回此服务器套接字的本地地址
+int getLocalPort();返回此套接字在其上监听的端口号
+SocketAddress getLocalSocketAddress();返回此套接字绑定的端点的地址
+
+====================================
+UDP
+DatagramSocket类设置端口
+DatagramPacket类设置数据报 
+
+练习
+1.用UDP实现登录功能
+2.用UDP实现文件的上传和下载
+============================
+URL编程
+URL类的构造方法都需要抛出异常
+一个URL对象生成后，其属性是不能被改变的，可以通过以下方法来获取属性
+public String getProtocol(); 获取URL的协议名
+public String getHost();获取URL的主机名
+public String getPort();获取URL的端口号
+public String getPath();获取URL的文件路径
+public String getFile();获取URL的文件名
+public String getRef();获取URL在文件中的相对位置
+public String getQuery();获取该URL的查询名
+openStream();返回为InputStream，读取当前连接的信息
+=============================
+URLConnection针对HTTP协议
+URLConnection urlconnection = URL对象.openConnection();
+=======================================
+位于网络中的计算机有唯一的IP
+TCP用于实现面向连接会话
+
+
+
+
+
+
+

@@ -1,0 +1,66 @@
+//工厂模式是为了程序员之间的合作，互不干扰，在改动代码时为了不需要都修改的设计的模式。
+//开发人员A
+//宝马车的接口及其实现类
+public interface BMO {
+    public void showInfo();
+}
+class BMO3 implements BMO{
+
+    @Override
+    public void showInfo() {
+       System.out.println("这是宝马3系车");
+    }
+}
+class BMO5 implements BMO{
+
+    @Override
+    public void showInfo() {
+        System.out.println("这是宝马5系车");
+    }
+}
+class BMO7 implements BMO{
+
+    @Override
+    public void showInfo() {
+        System.out.println("这是宝马7系车");
+    }
+}
+//宝马工厂的接口及其实现类，宝马工厂的作用是为了让类的实例化由程序员A来完成，这样在程序员A改动代码时程序员B不需要改动代码
+public interface BMOFactory {
+    public  BMO productBMO();
+}
+class BMOFactory3 implements  BMOFactory{
+    @Override
+    public BMO productBMO() {
+        System.out.println("生产宝马3系车");
+        return new BMO3();
+    }
+}
+
+class  BMOFactory5 implements BMOFactory{
+    @Override
+    public BMO productBMO() {
+        System.out.println("生产宝马5系车");
+        return new BMO5();
+    }
+}
+class BMOFactory7 implements  BMOFactory{
+    @Override
+    public BMO productBMO() {
+        System.out.println("生产宝马7系车");
+        return new BMO7();
+    }
+}
+//开发人员B完成的代码
+//利用接口的多态来完成，当程序员B在改动接口的实现类的名称时程序员B不需要改动代码
+public class Test {
+
+    public static void main(String[] args) {
+      BMO b3 = new BMOFactory3().productBMO();
+      b3.showInfo();
+      BMO b5 = new BMOFactory5().productBMO();
+      b5.showInfo();
+      BMO b7 = new BMOFactory7().productBMO();
+      b7.showInfo();
+    }
+}

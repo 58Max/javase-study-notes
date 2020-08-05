@@ -1,0 +1,56 @@
+Tomcat
+
+===================
+web开发入门
+c/s:客户端与服务端
+1）需要安装特定的客户端
+2）服务器程序升级，客户端程序同步升级
+
+b/s:浏览器与服务端
+1)不需要安装特定的客户端
+2）服务器程序升级，客户端程序不需要升级
+
+服务器物理机+不同的服务器软件 = 不同的服务器
+
+=====================
+Tomcat服务器目录结构
+bin里面存放的操作命令
+.bat结尾文件 是 windows下的指令集
+.sh结尾文件 是linux系统下的指令集
+
+start.bat Tomcat启动指令集 后台调用的是 catalina.bat.start
+shutdown.bat  Tomcat停止指令集 catalina.abt.stop
+
+config 配置
+conf配置文件夹 server.xml Tomcat的核心配置文件
+
+lib Tomcat支持jar包所在文件夹
+
+logs 日志文件
+
+temp 临时文件夹
+
+webapps 存放要运行的资源文件夹 ROOT 默认资源文件夹
+
+work 放置编译后的jsp
+
+=====================================
+URL 统一资源定位符 用来定位基于http协议的资源
+
+http:// 协议，http协议
+
+localhost IP或域名
+               localhost 本地域名（127.0.0.1本地IP）
+               www.baidu.com： 外地域名
+
+8080   端口 ， 定位一台计算机上一个具体的软件
+
+demo  web应用的根目录，在 webapps下面
+
+test.html  web资源
+
+============================
+
+Tomcat 的整合
+
+取路径时，项目名+Webcontent后面的部分 

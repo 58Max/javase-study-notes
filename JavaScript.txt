@@ -1,0 +1,154 @@
+JavaScript
+javaScript是脚本语言，弱类型语言
+严格区分大小写
+
+=============================
+基本语法
+
+不需要声明数据类型
+均使用var
+关键字不能当做变量名
+
+====================
+基本数据类型
+number
+String
+boolea
+
+字符串转化为数字 首先回查明位置为0的字符，如果不是数字，返回NAN，或直接查到非数字为止
+parseInt()//转化为整数
+parseFloat()//转化为小数
+
+var s;未声明类型则为defaul类型
+
+===============================
+数组与json
+
+数组就是Java中的数组
+
+json类似java中的map集合，(k,v)型数据，v部分可以是任何类型的数据  ，可以在json中再写一个json
+
+===========================
+js中的运算符
+
+与Java运算符基本一致
+js中有 == 和 ===
+==会把自动转换数据类型再进行比较
+===先看数据类型，如果数据类型不同直接返回false，一直在进行比较大小
+
+================================
+js的循环与判断
+
+循环： 主要以for循环为主
+for循环有两种方式
+1.普通的循环for（var i = 0; i < arr.length;i++）
+2.for(var i in arr)类似foreach循环
+字符串也可以当做数组来处理遍历 
+判断：if else
+
+===========================
+js的函数 
+
+声明函数 function 函数名(){}
+调用时直接函数名()
+可以有匿名方法
+
+和Java方法的区别，Js中的函数是可以作为一个参数传递给其他方法使用
+
+==========================================
+Js的面向对象 
+内置对象： Boolean ,Number,String ,Math,Date，数组等等
+
+==================================================
+Js的String类
+
+var str = new String("####");
+var str = "#####";
+charAt(n)；返回第n个位置的字符
+concat();字符串连接，返回值为String
+indexOf("###");判断字符中第一次出现此字符串的位置
+indexOf("####",int start);从第start位置开始检查，返回第一次出现字符串的位置
+replace(beReplacedValue,replaceValue);替换字符串
+split("####");以该字符切割，返回数组
+substring(int start ,int end);从start位置切割到end位置，[ , )
+toUpperCase();转大写
+toLowerCase();转小写
+
+================================
+js的Number，Boolean，Math类
+
+Number
+var num = 12;
+var num = new(12);
+toFixed(int num);num保留小数的位数
+
+Boolean
+var boolean = new Boolean(false/true);
+var boolean = true/false;
+
+Math
+Math.abs(number);返回绝对值
+Math.acos(number);返回反余弦
+Math.asin(number);返回反正弦
+Math.atan(number);返回反正切
+Math.atan2(y,x);返回由X轴到(y,x)点的角度（以弧度为单位）
+Math.ceil(number);返回大于或等于数字参数的最小整数
+Math.cos();返回数的余弦值
+Math.max(number...);返回最大值
+Math.min(number...)；返回最小值
+Math.pow(x,y);x的y次方
+
+==========================
+Js的Date对象
+var date = new Date();
+getFullYear();年
+getMonth();月，因为从0开始计算需要加1
+getDate();日
+getDay();星期
+getHours();小时
+getMinutes();分钟
+getSeconds();秒
+
+========================
+Js的数组对象
+var arr=[];
+var arr = new Array();
+
+sort();返回值为Array,自然排序
+reverse();返回值为Array,把数组到过来
+push();在数组末尾加入元素，如果是数组或者几个数字将会被当做一个元素加入数组中
+pop();移除数组最后一个元素，并返回该元素
+shift();移除数组第一个元素，并返回该元素
+unshift();在数组首插入元素，如果是数组或者几个数字将会被当做一个元素加入数组中
+splice(start, number,"### ");用"###"start开始替换number个'
+concat();合并一个数组并返回数组
+slice(start,end);取得下标为start -end的元素，[ , )
+join(seperator);归约，把每个元素用分割符隔开
+
+==============================
+自定义对象
+
+function 对象(){}
+无参构造函数
+var Person = function(){alert();}
+有参构造函数
+var Student  = function(name,age){ this.name = name; this.age = age;}
+
+
+对于Js自定义对象属性可以自定义定义，只要符合 "对象.属性 = 属性值" 的结构
+var p = new Person();p.name = "58max";
+
+给对象绑定方法，方法可以任意定义 只要符合 "对象.方法名 = function(){}" 的结构
+p.showInfo = function(){}
+
+对象绑定的属性和方法，对所有对象都适用
+
+==================================
+Object类
+
+我们可以定义一个类以后，通过这个类实例化我们任意想得到的对象
+
+如果我们通过Object类实例化自己想要的对象不会产生歧义
+
+再设置我们想要对象的属性和方法
+

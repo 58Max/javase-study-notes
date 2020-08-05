@@ -1,0 +1,122 @@
+Java8的新特性
+=====================
+接口中加入了默认方法和是实现方法
+
+ 默认方法 需要在方法前加 defaul 关键字，在实现类中不必实现
+ 静态方法 需要在方法前加 static 关键字，使用时直接接口名.方法名
+
+=============================
+函数式接口
+
+lambda表达式
+
+当一个接口中只有一个方法时，可以使用lambda表达式
+
+例如： void add(int a,int b){
+                 return a+b;
+          }
+         lambda表达式： (a,b)->a+b
+
+           void test(String str){
+                 System.out.println(str);
+              }
+   lambda表达式： str->System.out.println(str);
+
+lambda编码规范
+1.当只有一个参数时，可以加参数类型，加不加括号都可以
+2.当代码块的代码不止一行时，必须加大括号
+3.当有一个以上的参数时，需要加括号，加不加参数类型都可以
+4.当有返回值类型时，但只有一行代码时，加不加return都可以，但在大括号内必须要加return
+
+===========================
+foreach
+
+foreach 与 lambda配合遍历集合
+
+List 
+
+示例： List<Integer> list = new ArrayList();
+           ................添加集合元素
+          list.forEach(i ->System.out.print(i + " "));//用foreEach()配合lamdba遍历
+Map
+
+示例： Map<String,String> map = new HashMap();
+           .............................添加集合元素
+           map.forEach((k,v)->System.out.println(k,v));//用foreEach()配合lamdba遍历
+
+=======================================
+方法的引用
+
+静态方法
+
+类名：：方法名
+
+普通方法
+
+对象：：方法名
+
+===============================
+Stream
+对集合或数组操作的一个工具，逻辑实现于lambda
+
+串行流stream()
+
+并行流parallelStream()
+
+对于数组
+串行流 Stream.of(数组名)  
+并行流 Stream.of(数组名).parallel()
+
+count();返回值为long，输出为数组元素的个数
+max((a,b)->a-b).get();返回值为 int,输出最大值
+min((a,b)->a-b).get();返回值为 int,输出最小值
+
+forEach();
+串行流和并行流的区别
+并行流类似于把流分成几部分，把这几个部分分别放到线程中，同时执行
+
+map方法
+可以把每个元素进行某些逻辑处理过后并映射回原来的位置，替换原来的元素
+
+filter方法
+
+通过设置条件过滤元素
+
+limit方法
+
+用于获取指定数量的流。（取得流中的前几个元素）
+
+sorted()方法
+
+将数组排序，默认字典排序
+
+Collectors()方法
+
+归约操作，将流转换成集合和聚合元素，可用于返回列表或字符串
+一般配合filter()和map()使用
+
+Stream的统计方法
+可以通过 Stream.mapToInt().summaryStatistics()，返回一个IntSummaryStatistics对象获得最大值，最小值，平均值，和
+
+distinct();去除流中的重复元素
+concat();合并两个流
+
+
+try{}catch{}finally{}
+try{
+System.out.pintln("111");
+return test();
+}catch(Exception ex){
+
+}finally{
+System.out.println(".......");
+}
+void test(){
+System.out.println("22")
+}
+先这么看不用纠结代码
+执行顺序
+1111
+22
+........
+

@@ -1,0 +1,19 @@
+session技术服务端
+session存在在服务器端
+getSession();获取session对象
+setAttribute();设置数据
+getAtribute();获得数据 根据key获得数据
+removeAttribute();清除数据 根据key清除数据
+setMaxInactiveInterval();设置session有效时长
+getId();得到session相应的编号
+invalidate();销毁session对象
+
+session原理
+session对象类似于大型的map集合map<String,object>对象，分配一个JSESSIONID，会话数据保存在session对象中，服务器把JSESSIONID作为cookie发送给浏览器保存
+getSession(true/false);会执行以下操作
+当浏览器访问服务器时，请求头会带着JSESSIONID，服务器会查找JSESSIONID是否存在，如果存在session对象就返回，如果不存在，参数为true时会创建一个对应JSESSIONID的session对象并返回，如果参数为false或无参返回null
+
+session细节
+关闭浏览器不会导致session对象的销毁，因为session对象存在于服务器端
+setMaxInactiveInterval();设置session有效时长 默认30分钟服务器自动回收对象（从最后一次访问session对象开始计算）
+默认情况下JSESSOIN保存在浏览器内存中，如果要保存到cookie所在浏览器的硬盘，把JESSOINID存储在cookie中

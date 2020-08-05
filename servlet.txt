@@ -1,0 +1,102 @@
+servlet 用java语言开发网页动态资源
+
+servlet特点
+         1 servlet就是一个普通的java类，继承HttpServlet类
+         2 一个普通的java类实现了Servlet接口，也叫Servlet程序
+         3 servlet程序交给tomcat服务器运行
+
+servlet 的执行过程
+
+URL->web.xml(mapping - >name)->class文件
+
+HTTPServletRequest对象
+
+getParameter(Stirng g0);获取参数
+
+========================
+什么时候走Servlet的doPost还是doGet方法看 method 属性是 post 还是 get 
+浏览器直接访问servlet就会走doGet方法
+
+get请求就是把参数放在URL 链接上
+
+get请求存在的问题
+get请求存在安全问题 请求参数明码写在URL上，这样的请求可以越过点击按钮的过程，只要构造一个符合要求的URL就行
+浏览器的地址栏长度有限，服务器软件能够接收URL请求的长度也有限，大概是6000到几万字节不等
+
+在做提交表单的时候尽量使用post请求
+
+当请求参数是中文时，直接获取会乱码
+需要对请求参数进行重新编码
+过程是 将获取的值用“iso-8859-1”解码得到byte[]
+然后用当前项目的编码进行编码
+String name0 = new String(name11.getBytes("ios8859-1"),"utf-8");
+
+setAttribute(参数名，参数); 设置参数并传递时使用
+getAttribute(参数名，参数); 获取参数，返回值为一个object对象
+getRequestDispacher(路径).forward(request,response); 把当前servlet的请求转发给其他的servlet处理
+***********注意 在这个过程中URL不发生变化，在内部进行处理
+
+Response对象
+
+getWriter().writer();可以动态输出html的网页信息
+输出时乱码可以用 response.setCharacterEmcoding("utf-8");
+sendredirect(路径);重定向，向其他网页发出请求
+重定向时传递参数，只能明码传送（get），此时参数如果是中文需要加URLENcoder.encode(参数值，"utf-8")
+
+servlet的生命周期
+
+servlet的生命周期由Tomcat服务器控制的
+servlet有4个生命周期
+1.构造方法 servlet对象的产生 在创建servlet对象调用时被Tomcat创建的单实例 调用1次
+2.init方法 创建完servlet会调用只调用一次 初始化一些公共的东西 调用一次
+3.service方法 在每次请求servlet时调用，调用n次
+4.destroy方法：servlet对象被销毁。Tomcat重启或者停止 调用 1次
+servlet生命周期即在Tomcat启动时创建开始，Tomcat停止或者web应用重启时结束
+
+servlet是单实例多线程的
+每次请求该servlet都会创建一个新的线程，请求中止时，该请求创建的线程会被摧毁
+但是所有请求使用的对象都是一个对象
+多个线程共用一个servlet实例（共享数据）
+
+如何避免并发问题
+1.尽量不要再servlet类中使用成员变量
+2.如果要使用成员变量，那么自己封装一个普通java类，在doGet()和doPost()使用
+3.如果在servlet中使用成员变量，给使用成员变量的代码块加上代码锁，尽量缩小同步锁的范围（不建议使用）无论怎样缩小也是存在锁的，意味着多线程调用有锁的代码必须要有获取锁和释放锁的过程，依然会降低执行效率，所以能不用就不用
+
+servlet的自动加载（对于web应用来说请求和返回结果尽量保持在1000毫秒以下）
+在默认的情况下，第一次访问servlet时由Tomcat创建servlet对象执行构造和init()方法，假设init()方法在执行时要消耗大量的时间。可以改变servlet的创建时机，在启动Tomcat时就创建对象并执行init()方法，在配置中加入<load-on-startup>数字</load-on-startup>数字越小优先级越高
+
+在servlet中有两个init()方法，一个无参 ，一个有参，有参数的init()中调用了无参的init()，在创建servlet后，Tomcat会调用有参的init()，无参的时交给开发去覆盖了。
+
+ServletConfig对象
+ServletConfig是一个接口
+用来加载Servlet配置的参数信息
+在web.xml中
+<init-param>
+<param-name>
+</param-name>
+<param-value>
+</param-value>
+</init-param>
+grtInitParameter();获取servlet的参数配置中的值<param-value>
+getParameterNames();获取servlet的参数配置中的所有参数名，返回值是枚举类型,
+getServletName();获取servlet名称
+
+ServletContext对象 也是一个接口
+servlet的上下文对象，表示当前web应用环境的信息
+创建时机：在Tomcat服务器加载完当前的Web应用后创建出来
+ServletContext对象作为ServletConfig成员变量传入servlet中
+getContextPath();得到web应用的上下文路径
+ServletContext对象也能设置web全局应用参数，可以设置多个
+getInitParameter("name");获取全局配置参数value值
+getInitParameterNames();获取全局配置参数名name，返回值为枚举类型
+ServletContext对象是一个域对象（有作用范围的对象）作用范围当前的web应用
+setAttribute();保存数据
+getAttribute();得到数据
+removeAttribute();清除数据
+getRealPath("/")；得到资源文件的绝对路径（这个得到的是这个web应用在这台电脑上的实际的部署位置） 
+
+ServletConfig每个servlet对象存在一个
+ServContext整个web项目存在一个
+
+request也是一个域对象，作用范围是一次请求，请求结束，作用结束
